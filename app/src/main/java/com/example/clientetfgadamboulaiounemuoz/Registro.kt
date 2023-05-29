@@ -1,6 +1,6 @@
 package com.example.clientetfgadamboulaiounemuoz
 
-import Usuario
+import com.example.clientetfgadamboulaiounemuoz.Clases.Usuario
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -29,11 +29,38 @@ class Registro : AppCompatActivity() {
 
         // Configurar el click listener del botón Registrarse
         buttonRegistrarse.setOnClickListener {
+            buttonRegistrarse.isEnabled = false
             val nombre = editTextNombre.text.toString()
             val direccion = editTextDireccion.text.toString()
             val telefono = editTextTelefono.text.toString()
             val email = editTextEmail.text.toString()
             val contraseña = editTextContraseña.text.toString()
+
+            // Asegurar que todos los campos estén completos
+            if (nombre.isEmpty() || direccion.isEmpty() || telefono.isEmpty() || email.isEmpty() || contraseña.isEmpty()) {
+                showToast("Todos los campos son obligatorios")
+                return@setOnClickListener
+            }
+
+            // Validar el formato de email
+            val regexEmail = "^[A-Za-z0-9+_.-]+@(.+)\$".toRegex()
+            if (!email.matches(regexEmail)) {
+                showToast("Formato de email inválido")
+                return@setOnClickListener
+            }
+
+            // Validar el formato de contraseña
+            val regexContraseña = "^(?=.*[A-Z])(?=.*[0-9]).+\$".toRegex()
+            if (!contraseña.matches(regexContraseña)) {
+                showToast("La contraseña debe contener al menos una letra mayúscula y un número")
+                return@setOnClickListener
+            }
+
+            // Validar el formato de telefono
+            if (telefono.length < 10) {
+                showToast("El teléfono debe tener al menos 10 dígitos")
+                return@setOnClickListener
+            }
 
             val usuario = Usuario(nombre, direccion, telefono, email, contraseña)
 
@@ -44,9 +71,11 @@ class Registro : AppCompatActivity() {
                 } else {
                     // Error en el registro
                     showToast("Error en el registro")
+                    buttonRegistrarse.isEnabled = true
                 }
             }
         }
+
 
     }
     private fun showToast(message: String) {
