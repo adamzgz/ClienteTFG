@@ -1,13 +1,14 @@
 package com.example.clientetfgadamboulaiounemuoz
 
+import Usuario
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.clientetfgadamboulaiounemuoz.Clases.Usuario
 
 class Login : AppCompatActivity() {
 
@@ -19,7 +20,22 @@ class Login : AppCompatActivity() {
         val passwordInput: EditText = findViewById(R.id.editTextPassword)
         val loginButton: Button = findViewById(R.id.buttonLogin)
         val registerButton: Button = findViewById(R.id.buttonRegister)
+        val sharedPreferences = getSharedPreferences("com.example.clientetfgadamboulaiounemuoz", Context.MODE_PRIVATE)
+        val token = sharedPreferences.getString("token", "")
+        val rol = sharedPreferences.getString("role", "")
+       /* if(!token.isNullOrEmpty()) {
+           val intent = when (rol) {
+                "Cliente" -> Intent(this@Login, ListadoProductos::class.java)
+                "Empleado" -> Intent(this@Login, Vista_gestion::class.java)
+                 else-> null
+            }
+            intent?.let {
+                startActivity(it)
+                finish()
+            }
+        }
 
+*/
         registerButton.setOnClickListener {
             val intent = Intent(this, Registro::class.java)
             startActivity(intent)
@@ -30,17 +46,27 @@ class Login : AppCompatActivity() {
             val username = usernameInput.text.toString()
             val password = passwordInput.text.toString()
             val usuario = Usuario("", "", "", username, password)
-            usuario.login(usuario) { success, token ->
+            Usuario.login(usuario) { success, token, role ->
                 if (success) {
                     val sharedPreferences = getSharedPreferences("com.example.clientetfgadamboulaiounemuoz", Context.MODE_PRIVATE)
                     with(sharedPreferences.edit()) {
                         putString("token", token)
+                        putString("role",role)
                         apply()
                     }
+                    Log.i("token",token)
 
-                    val intent = Intent(this@Login, ListadoProductos::class.java)
-                    startActivity(intent)
-                    finish()
+                    val intent = when (role) {
+                        "Cliente" -> Intent(this@Login, ListadoProductos::class.java)
+                        "Empleado" -> Intent(this@Login, Vista_gestion::class.java)
+                        else -> null
+                    }
+                    intent?.let {
+                        startActivity(it)
+                        finish()
+                    } ?: run {
+                        Toast.makeText(this@Login, "Rol del usuario desconocido: $role", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
                     runOnUiThread {
                         Toast.makeText(this@Login, "Inicio de sesión fallido", Toast.LENGTH_SHORT)

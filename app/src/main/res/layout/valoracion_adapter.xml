@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Puntuación (en forma de estrellas) -->
+    <RatingBar
+        android:id="@+id/ratingBarValoracion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="5"
+        android:stepSize="1"
+
+        android:layout_gravity="left"
+        android:isIndicator="true"
+    />
+
+    <!-- Comentario de la valoración -->
+    <TextView
+        android:id="@+id/tvComentario"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Comentario del usuario"
+        android:textSize="16sp"
+        />
+
+    <!-- Fecha de la valoración -->
+    <TextView
+        android:id="@+id/tvFechaValoracion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="Fecha de valoración"
+        android:textSize="12sp"
+        android:textColor="#888888"
+        />
+
+    <!-- Puedes agregar cualquier otro elemento adicional aquí -->
+
+</LinearLayout>

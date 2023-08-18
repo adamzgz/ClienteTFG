@@ -1,6 +1,7 @@
 package com.example.clientetfgadamboulaiounemuoz
 
-import com.example.clientetfgadamboulaiounemuoz.Clases.Usuario
+
+import Usuario
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -64,7 +65,7 @@ class Registro : AppCompatActivity() {
 
             val usuario = Usuario(nombre, direccion, telefono, email, contraseña)
 
-            usuario.registrar(usuario) { success ->
+            Usuario.registrar(usuario) { success ->
                 if (success) {
                     // Registro exitoso
                     finish() // Cerrar la actividad de registro y volver a la actividad de inicio de sesión
