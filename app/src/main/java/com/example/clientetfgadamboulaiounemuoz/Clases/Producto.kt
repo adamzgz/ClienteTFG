@@ -11,7 +11,6 @@ data class Producto(
     val nombre: String,
     val descripcion: String,
     val precio: Double,
-    val stock: Int,
     val idCategoria: Int,
     val imagen: String
 ) {
@@ -19,7 +18,7 @@ data class Producto(
         private const val BASE_URL = URL.BASE_URL // URL base hardcoded
 
         fun crearProducto(producto: Producto, token: String, callback: (Boolean) -> Unit) {
-            val url = "$BASE_URL/secure/productos" // URL para crear producto
+            val url = "$BASE_URL/productos" // URL para crear producto
             val json = Gson().toJson(producto)
 
             val requestBody = json.toRequestBody("application/json".toMediaType())
@@ -47,7 +46,7 @@ data class Producto(
         }
 
         fun borrarProducto(id: Int, token: String, callback: (Boolean) -> Unit) {
-            val url = "$BASE_URL/secure/productos/$id" // URL para borrar producto
+            val url = "$BASE_URL/productos/$id" // URL para borrar producto
             val request = Request.Builder()
                 .url(url)
                 .header("Authorization", "Bearer $token") // Agrega el token en el encabezado
@@ -72,7 +71,7 @@ data class Producto(
         }
 
         fun modificarProducto(id: Int, nuevoProducto: Producto, token: String, callback: (Boolean) -> Unit) {
-            val url = "$BASE_URL/secure/productos/$id" // URL para modificar producto
+            val url = "$BASE_URL/productos/$id" // URL para modificar producto
             val json = Gson().toJson(nuevoProducto)
 
             val requestBody = json.toRequestBody("application/json".toMediaType())
@@ -100,7 +99,7 @@ data class Producto(
         }
 
         fun obtenerProductos(token: String, callback: (List<Producto>?) -> Unit) {
-            val url = "$BASE_URL/secure/productos" // URL para obtener productos
+            val url = "$BASE_URL/productos" // URL para obtener productos
             val request = Request.Builder()
                 .url(url)
                 .header("Authorization", "Bearer $token") // Agrega el token en el encabezado
@@ -122,6 +121,37 @@ data class Producto(
                     val productos = Gson().fromJson(responseBody, Array<Producto>::class.java)?.toList()
                     println("Respuesta recibida. Success = $success, Productos = $productos")
                     callback(productos)
+                }
+            })
+        }
+
+        fun obtenerProductoPorId(id: Int, token: String, callback: (Producto?) -> Unit) {
+            val url = "$BASE_URL/productos/$id" // URL para obtener un producto específico por ID
+            val request = Request.Builder()
+                .url(url)
+                .header("Authorization", "Bearer $token") // Agrega el token en el encabezado
+                .get()
+                .build()
+
+            println("Enviando solicitud para obtener el producto con ID $id a: $url")
+
+            val client = OkHttpClient()
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    println("Error al enviar solicitud: ${e.message}")
+                    callback(null)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    val success = response.isSuccessful
+                    val responseBody = response.body?.string()
+                    val producto = if (success) {
+                        Gson().fromJson(responseBody, Producto::class.java)
+                    } else {
+                        null
+                    }
+                    println("Respuesta recibida. Success = $success, Producto = $producto")
+                    callback(producto)
                 }
             })
         }

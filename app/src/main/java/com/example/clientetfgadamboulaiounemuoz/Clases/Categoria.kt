@@ -9,20 +9,23 @@ import org.json.JSONObject
 import java.io.IOException
 
 data class Categoria(
+    val id: Int,  // Añadimos el ID de la categoría
     val nombre: String
 ) {
     companion object {
         private const val BASE_URL = URL.BASE_URL
-        private const val ENDPOINT_CATEGORIAS = "$BASE_URL/categorias"
-        private const val ENDPOINT_CREAR_CATEGORIA = "$ENDPOINT_CATEGORIAS/crear"
-        private const val ENDPOINT_ELIMINAR_CATEGORIA = "$ENDPOINT_CATEGORIAS/eliminar/{id}"
-        private const val ENDPOINT_ACTUALIZAR_CATEGORIA = "$ENDPOINT_CATEGORIAS/actualizar/{id}"
+        private const val ENDPOINT_CATEGORIAS = "$BASE_URL/secure/categorias"
 
         fun crearCategoria(categoria: Categoria, callback: (Boolean) -> Unit) {
-            val url = ENDPOINT_CREAR_CATEGORIA
-            val json = Gson().toJson(categoria)
+            val url = ENDPOINT_CATEGORIAS
 
-            val requestBody = json.toRequestBody("application/json".toMediaType())
+            // Asumimos que al crear una categoría no necesitas enviar el ID, ya que
+            // el backend debería generarlo automáticamente. Entonces creamos un objeto sin el ID para enviar.
+            val categoriaParaEnviar = JSONObject()
+                .put("nombre", categoria.nombre)
+                .toString()
+
+            val requestBody = categoriaParaEnviar.toRequestBody("application/json".toMediaType())
             val request = Request.Builder()
                 .url(url)
                 .post(requestBody)
@@ -72,7 +75,7 @@ data class Categoria(
         }
 
         fun obtenerCategoria(id: Int, callback: (Categoria?) -> Unit) {
-            val url = ENDPOINT_CATEGORIAS.replace("{id}", id.toString())
+            val url = "$ENDPOINT_CATEGORIAS/$id"
             val request = Request.Builder()
                 .url(url)
                 .get()
@@ -98,7 +101,7 @@ data class Categoria(
         }
 
         fun actualizarCategoria(id: Int, nuevoNombre: String, callback: (Boolean) -> Unit) {
-            val url = ENDPOINT_ACTUALIZAR_CATEGORIA.replace("{id}", id.toString())
+            val url = "$ENDPOINT_CATEGORIAS/$id"
             val requestBody = JSONObject().apply {
                 put("nombre", nuevoNombre)
             }.toString().toRequestBody("application/json".toMediaType())
@@ -126,7 +129,7 @@ data class Categoria(
         }
 
         fun eliminarCategoria(id: Int, callback: (Boolean) -> Unit) {
-            val url = ENDPOINT_ELIMINAR_CATEGORIA.replace("{id}", id.toString())
+            val url = "$ENDPOINT_CATEGORIAS/$id"
             val request = Request.Builder()
                 .url(url)
                 .delete()

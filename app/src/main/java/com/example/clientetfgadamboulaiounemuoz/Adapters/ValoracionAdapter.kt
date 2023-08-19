@@ -10,7 +10,7 @@ import android.widget.RatingBar
 import android.widget.TextView
 import com.example.clientetfgadamboulaiounemuoz.R
 
-class ValoracionAdapter(private val context: Context, private val valoraciones: List<ValoracionDto>) : BaseAdapter() {
+class ValoracionAdapter(private val context: Context, private val valoraciones: List<Valoracion>) : BaseAdapter() {
 
     override fun getCount(): Int = valoraciones.size
 
@@ -23,7 +23,7 @@ class ValoracionAdapter(private val context: Context, private val valoraciones: 
         val viewHolder: ViewHolder
 
         if (convertView == null) {
-            view = LayoutInflater.from(context).inflate(R.layout.valoracion_item, parent, false)
+            view = LayoutInflater.from(context).inflate(R.layout.valoracion_adapter, parent, false)
             viewHolder = ViewHolder(view)
             view.tag = viewHolder
         } else {
@@ -45,8 +45,8 @@ class ValoracionAdapter(private val context: Context, private val valoraciones: 
 
         fun bind(valoracion: Valoracion, context: Context) { // Añadimos context como parámetro
             ratingBarValoracion.rating = valoracion.puntuacion.toFloat()
-            tvComentario.text = valoracion.comentario ?: context.getString(R.string.sin_comentario)
-            tvFechaValoracion.text = "Fecha de valoración: ${valoracion.fecha_valoracion}"
+            tvComentario.text = valoracion.comentario ?: "Sin comentario"
+            tvFechaValoracion.text = "Fecha de valoración: ${valoracion.fecha}"
         }
     }
 }

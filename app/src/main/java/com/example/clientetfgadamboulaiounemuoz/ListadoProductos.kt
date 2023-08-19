@@ -2,26 +2,48 @@ package com.example.clientetfgadamboulaiounemuoz
 
 import Producto
 import ProductoAdapter
+import com.example.clientetfgadamboulaiounemuoz.Clases.Categoria
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
 
 class ListadoProductos : AppCompatActivity() {
 
     private lateinit var listView: ListView
+    private lateinit var categoriasSpinner: Spinner
     private lateinit var adapter: ProductoAdapter
     private var productos: List<Producto> = emptyList()
+    private var categorias: List<Categoria> = listOf(Categoria(id = -1, nombre = "Todas"))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_listado_productos)
 
         listView = findViewById(R.id.productListView)
+        categoriasSpinner = findViewById(R.id.categoriaSpinner)
+
         adapter = ProductoAdapter(this, productos)
         listView.adapter = adapter
-        agregarProductoFicticio()
+
+        obtenerProductos()
+        obtenerCategorias()
+
+        categoriasSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val categoriaSeleccionada = categorias[position]
+                filtrarProductosPorCategoria(categoriaSeleccionada)
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // No se hace nada aquí
+            }
+        }
     }
 
     private fun obtenerProductos() {
@@ -39,44 +61,29 @@ class ListadoProductos : AppCompatActivity() {
         }
     }
 
-
-    private fun obtenerProductosDeLaAPI(): List<Producto> {
-        // Aquí implementas la lógica para obtener los productos desde tu API
-        // o cualquier otra fuente de datos
-        // Devuelve una lista de productos obtenidos
-
-        // Ejemplo de lista de productos ficticia
-        val productos: List<Producto> = listOf(
-            Producto("Producto 1", "Descripción del producto 1", 10.0, 5, 1, "imagen1.png"),
-            Producto("Producto 2", "Descripción del producto 2", 20.0, 8, 2, "imagen2.png"),
-            Producto("Producto 3", "Descripción del producto 3", 15.0, 3, 3, "imagen3.png"),
-            Producto("Producto 4", "Descripción del producto 4", 12.0, 6, 4, "imagen4.png")
-        )
-
-        return productos
-    }
-    private fun agregarProductoFicticio() {
-        val productoFicticio = Producto(
-            "Producto ficticio",
-            "Descripción del producto ficticio",
-            9.99,
-            10,
-            1,
-            "imagen_producto_ficticio.png"
-        )
-
-        val sharedPreferences = getSharedPreferences("com.example.clientetfgadamboulaiounemuoz", Context.MODE_PRIVATE)
-        val token = sharedPreferences.getString("token", "")
-        Log.i("tokenprefs",token!!)
-        Producto.crearProducto(productoFicticio, token!!) { success ->
-            if (success) {
-                // Producto ficticio creado exitosamente en el servidor
-                // Actualizar la lista de productos y el adaptador
-                obtenerProductos()
+    private fun obtenerCategorias() {
+        Categoria.obtenerCategorias { categoriasFromAPI ->
+            if (categoriasFromAPI != null) {
+                this.categorias = listOf(Categoria(id = -1, nombre = "Todas")) + categoriasFromAPI
+                cargarCategoriasAlSpinner()
             } else {
-                // Manejar el caso de error al crear el producto ficticio en el servidor
+                println("Error al cargar las categorías desde el servidor")
             }
         }
     }
 
+    private fun cargarCategoriasAlSpinner() {
+        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categorias.map { it.nombre })
+        categoriasSpinner.adapter = spinnerAdapter
+    }
+
+    private fun filtrarProductosPorCategoria(categoria: Categoria) {
+        if (categoria.id == -1) {  // Categoría "Todas"
+            adapter = ProductoAdapter(this, productos)
+        } else {
+            val productosFiltrados = productos.filter { it.idCategoria == categoria.id }
+            adapter = ProductoAdapter(this, productosFiltrados)
+        }
+        listView.adapter = adapter
+    }
 }

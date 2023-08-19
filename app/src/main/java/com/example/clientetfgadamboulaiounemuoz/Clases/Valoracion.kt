@@ -10,7 +10,8 @@ data class Valoracion(
     val id_cliente: Int,
     val id_producto: Int,
     val puntuacion: Int,
-    val comentario: String?
+    val comentario: String?,
+    val fecha: String?
 ) {
     companion object {
         private const val BASE_URL = URL.BASE_URL

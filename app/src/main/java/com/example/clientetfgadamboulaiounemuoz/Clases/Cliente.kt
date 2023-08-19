@@ -15,9 +15,9 @@ data class Cliente(
     companion object {
         private const val BASE_URL = URL.BASE_URL
         private const val ENDPOINT_CLIENTES = "$BASE_URL/clientes"
-        private const val ENDPOINT_CREAR_CLIENTE = "$ENDPOINT_CLIENTES/crear"
-        private const val ENDPOINT_ELIMINAR_CLIENTE = "$ENDPOINT_CLIENTES/eliminar/{id}"
-        private const val ENDPOINT_ACTUALIZAR_CLIENTE = "$ENDPOINT_CLIENTES/actualizar/{id}"
+        private const val ENDPOINT_CREAR_CLIENTE = "$ENDPOINT_CLIENTES"
+        private const val ENDPOINT_ELIMINAR_CLIENTE = "$ENDPOINT_CLIENTES/{id}"
+        private const val ENDPOINT_ACTUALIZAR_CLIENTE = "$ENDPOINT_CLIENTES/{id}"
 
         fun crearCliente(cliente: Cliente, callback: (Boolean) -> Unit) {
             val url = ENDPOINT_CREAR_CLIENTE
@@ -73,7 +73,7 @@ data class Cliente(
         }
 
         fun obtenerCliente(id: Int, callback: (Cliente?) -> Unit) {
-            val url = ENDPOINT_CLIENTES.replace("{id}", id.toString())
+            val url = "$ENDPOINT_CLIENTES/$id"
             val request = Request.Builder()
                 .url(url)
                 .get()

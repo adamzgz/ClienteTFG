@@ -6,4 +6,83 @@
     android:layout_height="match_parent"
     tools:context=".Vista_gestion">
 
+    <!-- Botón para ver pedidos en la parte superior -->
+    <Button
+        android:id="@+id/btnVerPedidos"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:text="Ver Pedidos"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/guidelineTop"
+        app:layout_constraintBottom_toTopOf="@id/btnGestionUsuarios" />
+
+    <!-- Botón para gestionar usuarios -->
+    <Button
+        android:id="@+id/btnGestionUsuarios"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:text="Gestión de Usuarios"
+        app:layout_constraintBottom_toTopOf="@id/btnAnadirUsuario"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnVerPedidos" />
+
+    <!-- Botón para añadir usuario -->
+    <Button
+        android:id="@+id/btnAnadirUsuario"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:text="Añadir Usuario"
+        app:layout_constraintTop_toBottomOf="@id/btnGestionUsuarios"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btnGestionProductos" />
+
+    <!-- Botón para gestionar productos -->
+    <Button
+        android:id="@+id/btnGestionProductos"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:text="Gestión de Productos"
+        app:layout_constraintTop_toBottomOf="@id/btnAnadirUsuario"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btnAnadirProducto" />
+
+    <!-- Botón para añadir producto -->
+    <Button
+        android:id="@+id/btnAnadirProducto"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:text="Añadir Producto"
+        app:layout_constraintTop_toBottomOf="@id/btnGestionProductos"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/guidelineBottom" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.4" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.6" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

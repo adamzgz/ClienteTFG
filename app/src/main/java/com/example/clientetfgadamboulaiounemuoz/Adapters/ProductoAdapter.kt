@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import com.bumptech.glide.Glide
 import com.example.clientetfgadamboulaiounemuoz.R
 
 class ProductoAdapter(private val context: Context, private val productos: List<Producto>) : BaseAdapter() {
@@ -35,9 +36,7 @@ class ProductoAdapter(private val context: Context, private val productos: List<
         }
 
         val producto = productos[position]
-
         viewHolder.bind(producto)
-
         return view
     }
 
@@ -45,7 +44,6 @@ class ProductoAdapter(private val context: Context, private val productos: List<
         private val nombreTextView = view.findViewById<TextView>(R.id.nombreTextView)
         private val descripcionTextView = view.findViewById<TextView>(R.id.descripcionTextView)
         private val precioTextView = view.findViewById<TextView>(R.id.precioTextView)
-        private val stockTextView = view.findViewById<TextView>(R.id.stockTextView)
         private val categoriaTextView = view.findViewById<TextView>(R.id.categoriaTextView)
         private val imagenImageView = view.findViewById<ImageView>(R.id.imagenImageView)
 
@@ -53,11 +51,15 @@ class ProductoAdapter(private val context: Context, private val productos: List<
             nombreTextView.text = producto.nombre
             descripcionTextView.text = producto.descripcion
             precioTextView.text = producto.precio.toString()
-            stockTextView.text = producto.stock.toString()
             categoriaTextView.text = producto.idCategoria.toString()
 
+            val imageUrl = "http://127.0.0.1:8080/img_productos/${producto.imagen}"
 
-            imagenImageView.setImageResource(R.drawable.logo)
+            Glide.with(imagenImageView.context)
+                .load(imageUrl)
+                .placeholder(R.drawable.logo)  // Muestra una imagen placeholder mientras la imagen se está descargando.
+                .error(R.drawable.noimage)  // Muestra esta imagen si hay un error al descargar.
+                .into(imagenImageView)
         }
     }
 }

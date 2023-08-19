@@ -5,16 +5,19 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.IOException
+import java.time.LocalDate
 
 data class Pedido(
     val id_cliente: Int,
-    val estado: String
+    val estado: String,
+    val fecha: String
 ) {
     companion object {
         private const val BASE_URL = URL.BASE_URL // URL base hardcoded
 
-        fun crearPedido(pedido: Pedido, callback: (Boolean) -> Unit) {
+        fun crearPedido(idCliente: Int, estado: EstadoPedido, callback: (Boolean) -> Unit) {
             val url = "$BASE_URL/pedidos" // URL para crear pedido
+            val pedido = Pedido(idCliente, estado.name, LocalDate.now().toString())
             val json = Gson().toJson(pedido)
 
             val requestBody = json.toRequestBody("application/json".toMediaType())
@@ -64,10 +67,10 @@ data class Pedido(
             })
         }
 
-        fun modificarPedido(id: Int, nuevoEstado: String, callback: (Boolean) -> Unit) {
+        fun modificarPedido(id: Int, nuevoEstado: EstadoPedido, callback: (Boolean) -> Unit) {
             val url = "$BASE_URL/pedidos/actualizar/$id" // URL para modificar pedido
             val requestBody = JSONObject().apply {
-                put("estado", nuevoEstado)
+                put("estado", nuevoEstado.name)
             }.toString().toRequestBody("application/json".toMediaType())
 
             val request = Request.Builder()
@@ -116,6 +119,13 @@ data class Pedido(
                     callback(pedidos)
                 }
             })
+        }
+
+        enum class EstadoPedido {
+            PENDIENTE,   // pedido realizado por el cliente
+            ENVIADO,     // pedido enviado
+            ENTREGADO,   // pedido entregado
+            EN_PROCESO   // en el carrito
         }
     }
 }

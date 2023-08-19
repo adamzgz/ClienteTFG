@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
 
     <application
         android:allowBackup="true"
@@ -15,6 +17,20 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ClienteTFGAdamBoulaiouneMuñoz"
         tools:targetApi="31">
+        <activity
+            android:name=".addProducto"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".listadoGestion"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
         <activity
             android:name=".detalleProducto"
             android:exported="false">
