@@ -6,6 +6,7 @@ import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.example.clientetfgadamboulaiounemuoz.Clases.Producto
 import com.example.clientetfgadamboulaiounemuoz.R
 
 class ProductoAdapter(private val context: Context, private val productos: List<Producto>) : BaseAdapter() {

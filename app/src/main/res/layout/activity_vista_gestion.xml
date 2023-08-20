@@ -16,8 +16,7 @@
         android:text="Ver Pedidos"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/guidelineTop"
-        app:layout_constraintBottom_toTopOf="@id/btnGestionUsuarios" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Botón para gestionar usuarios -->
     <Button
@@ -27,10 +26,9 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:text="Gestión de Usuarios"
-        app:layout_constraintBottom_toTopOf="@id/btnAnadirUsuario"
+        app:layout_constraintTop_toBottomOf="@+id/btnVerPedidos"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnVerPedidos" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Botón para añadir usuario -->
     <Button
@@ -40,10 +38,9 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:text="Añadir Usuario"
-        app:layout_constraintTop_toBottomOf="@id/btnGestionUsuarios"
+        app:layout_constraintTop_toBottomOf="@+id/btnGestionUsuarios"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/btnGestionProductos" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Botón para gestionar productos -->
     <Button
@@ -53,10 +50,9 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:text="Gestión de Productos"
-        app:layout_constraintTop_toBottomOf="@id/btnAnadirUsuario"
+        app:layout_constraintTop_toBottomOf="@+id/btnAnadirUsuario"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/btnAnadirProducto" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Botón para añadir producto -->
     <Button
@@ -66,23 +62,32 @@
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:text="Añadir Producto"
-        app:layout_constraintTop_toBottomOf="@id/btnGestionProductos"
+        app:layout_constraintTop_toBottomOf="@+id/btnGestionProductos"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/guidelineBottom" />
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guidelineTop"
-        android:layout_width="wrap_content"
+    <!-- Botón para Ver Categorías -->
+    <Button
+        android:id="@+id/btnVerCategorias"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.4" />
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:text="Ver Categorías"
+        app:layout_constraintTop_toBottomOf="@+id/btnAnadirProducto"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guidelineBottom"
-        android:layout_width="wrap_content"
+    <!-- Botón para Añadir Categoría -->
+    <Button
+        android:id="@+id/btnAnadirCategoria"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.6" />
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:text="Añadir Categoría"
+        app:layout_constraintTop_toBottomOf="@+id/btnVerCategorias"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

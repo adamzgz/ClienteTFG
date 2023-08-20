@@ -1,0 +1,8 @@
+<!-- res/menu/menu_options.xml -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Otras opciones del menú aquí -->
+    <item
+        android:id="@+id/action_logout"
+        android:title="Cerrar sesión"
+        android:orderInCategory="100" />
+</menu>

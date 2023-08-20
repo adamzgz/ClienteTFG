@@ -1,3 +1,5 @@
+package com.example.clientetfgadamboulaiounemuoz.Clases
+
 import com.example.clientetfgadamboulaiounemuoz.API.URL
 import com.google.gson.Gson
 import okhttp3.*
@@ -17,140 +19,119 @@ data class Producto(
     companion object {
         private const val BASE_URL = URL.BASE_URL // URL base hardcoded
 
-        fun crearProducto(producto: Producto, token: String, callback: (Boolean) -> Unit) {
-            val url = "$BASE_URL/productos" // URL para crear producto
+        fun crearProducto(token: String, producto: Producto, callback: (Boolean) -> Unit) {
+            val url = "$BASE_URL/secure/productos"
             val json = Gson().toJson(producto)
 
             val requestBody = json.toRequestBody("application/json".toMediaType())
             val request = Request.Builder()
                 .url(url)
-                .header("Authorization", "Bearer $token") // Agrega el token en el encabezado
+                .header("Authorization", "Bearer $token")
                 .post(requestBody)
                 .build()
 
-            println("Enviando solicitud de creación de producto a: $url")
-
             val client = OkHttpClient()
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    println("Error al enviar solicitud: ${e.message}")
                     callback(false)
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    val success = response.isSuccessful
-                    println("Respuesta recibida. Success = $success")
-                    callback(success)
+                    callback(response.isSuccessful)
                 }
             })
         }
 
-        fun borrarProducto(id: Int, token: String, callback: (Boolean) -> Unit) {
-            val url = "$BASE_URL/productos/$id" // URL para borrar producto
+        fun borrarProducto(token: String, id: Int, callback: (Boolean) -> Unit) {
+            val url = "$BASE_URL/productos/$id"
             val request = Request.Builder()
                 .url(url)
-                .header("Authorization", "Bearer $token") // Agrega el token en el encabezado
+                .header("Authorization", "Bearer $token")
                 .delete()
                 .build()
 
-            println("Enviando solicitud de borrado de producto a: $url")
-
             val client = OkHttpClient()
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    println("Error al enviar solicitud: ${e.message}")
                     callback(false)
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    val success = response.isSuccessful
-                    println("Respuesta recibida. Success = $success")
-                    callback(success)
+                    callback(response.isSuccessful)
                 }
             })
         }
 
-        fun modificarProducto(id: Int, nuevoProducto: Producto, token: String, callback: (Boolean) -> Unit) {
-            val url = "$BASE_URL/productos/$id" // URL para modificar producto
+        fun modificarProducto(token: String, id: Int, nuevoProducto: Producto, callback: (Boolean) -> Unit) {
+            val url = "$BASE_URL/productos/$id"
             val json = Gson().toJson(nuevoProducto)
 
             val requestBody = json.toRequestBody("application/json".toMediaType())
             val request = Request.Builder()
                 .url(url)
-                .header("Authorization", "Bearer $token") // Agrega el token en el encabezado
+                .header("Authorization", "Bearer $token")
                 .put(requestBody)
                 .build()
-
-            println("Enviando solicitud de modificación de producto a: $url")
 
             val client = OkHttpClient()
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    println("Error al enviar solicitud: ${e.message}")
                     callback(false)
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    val success = response.isSuccessful
-                    println("Respuesta recibida. Success = $success")
-                    callback(success)
+                    callback(response.isSuccessful)
                 }
             })
         }
 
         fun obtenerProductos(token: String, callback: (List<Producto>?) -> Unit) {
-            val url = "$BASE_URL/productos" // URL para obtener productos
+            val url = "$BASE_URL/productos"
             val request = Request.Builder()
                 .url(url)
-                .header("Authorization", "Bearer $token") // Agrega el token en el encabezado
+                .header("Authorization", "Bearer $token")
                 .get()
                 .build()
-
-            println("Enviando solicitud para obtener productos a: $url")
 
             val client = OkHttpClient()
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    println("Error al enviar solicitud: ${e.message}")
                     callback(null)
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    val success = response.isSuccessful
                     val responseBody = response.body?.string()
-                    val productos = Gson().fromJson(responseBody, Array<Producto>::class.java)?.toList()
-                    println("Respuesta recibida. Success = $success, Productos = $productos")
+                    val productos = if (response.isSuccessful) {
+                        Gson().fromJson(responseBody, Array<Producto>::class.java)?.toList()
+                    } else {
+                        null
+                    }
                     callback(productos)
                 }
             })
         }
 
-        fun obtenerProductoPorId(id: Int, token: String, callback: (Producto?) -> Unit) {
-            val url = "$BASE_URL/productos/$id" // URL para obtener un producto específico por ID
+        fun obtenerProductoPorId(token: String, id: Int, callback: (Producto?) -> Unit) {
+            val url = "$BASE_URL/productos/$id"
             val request = Request.Builder()
                 .url(url)
-                .header("Authorization", "Bearer $token") // Agrega el token en el encabezado
+                .header("Authorization", "Bearer $token")
                 .get()
                 .build()
-
-            println("Enviando solicitud para obtener el producto con ID $id a: $url")
 
             val client = OkHttpClient()
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    println("Error al enviar solicitud: ${e.message}")
                     callback(null)
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    val success = response.isSuccessful
                     val responseBody = response.body?.string()
-                    val producto = if (success) {
+                    val producto = if (response.isSuccessful) {
                         Gson().fromJson(responseBody, Producto::class.java)
                     } else {
                         null
                     }
-                    println("Respuesta recibida. Success = $success, Producto = $producto")
                     callback(producto)
                 }
             })

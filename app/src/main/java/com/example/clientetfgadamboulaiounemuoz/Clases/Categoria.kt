@@ -9,18 +9,17 @@ import org.json.JSONObject
 import java.io.IOException
 
 data class Categoria(
-    val id: Int,  // Añadimos el ID de la categoría
+    val id: Int,
     val nombre: String
-) {
+) : java.io.Serializable
+{
     companion object {
         private const val BASE_URL = URL.BASE_URL
         private const val ENDPOINT_CATEGORIAS = "$BASE_URL/secure/categorias"
 
-        fun crearCategoria(categoria: Categoria, callback: (Boolean) -> Unit) {
+        fun crearCategoria(token: String, categoria: Categoria, callback: (Boolean) -> Unit) {
             val url = ENDPOINT_CATEGORIAS
 
-            // Asumimos que al crear una categoría no necesitas enviar el ID, ya que
-            // el backend debería generarlo automáticamente. Entonces creamos un objeto sin el ID para enviar.
             val categoriaParaEnviar = JSONObject()
                 .put("nombre", categoria.nombre)
                 .toString()
@@ -29,6 +28,7 @@ data class Categoria(
             val request = Request.Builder()
                 .url(url)
                 .post(requestBody)
+                .header("Authorization", "Bearer $token")
                 .build()
 
             println("Enviando solicitud de creación de categoría a: $url")
@@ -48,11 +48,12 @@ data class Categoria(
             })
         }
 
-        fun obtenerCategorias(callback: (List<Categoria>?) -> Unit) {
+        fun obtenerCategorias(token: String, callback: (List<Categoria>?) -> Unit) {
             val url = ENDPOINT_CATEGORIAS
             val request = Request.Builder()
                 .url(url)
                 .get()
+                .header("Authorization", "Bearer $token")
                 .build()
 
             println("Enviando solicitud para obtener categorías a: $url")
@@ -74,11 +75,12 @@ data class Categoria(
             })
         }
 
-        fun obtenerCategoria(id: Int, callback: (Categoria?) -> Unit) {
+        fun obtenerCategoria(token: String, id: Int, callback: (Categoria?) -> Unit) {
             val url = "$ENDPOINT_CATEGORIAS/$id"
             val request = Request.Builder()
                 .url(url)
                 .get()
+                .header("Authorization", "Bearer $token")
                 .build()
 
             println("Enviando solicitud para obtener categoría a: $url")
@@ -100,7 +102,7 @@ data class Categoria(
             })
         }
 
-        fun actualizarCategoria(id: Int, nuevoNombre: String, callback: (Boolean) -> Unit) {
+        fun actualizarCategoria(token: String, id: Int, nuevoNombre: String, callback: (Boolean) -> Unit) {
             val url = "$ENDPOINT_CATEGORIAS/$id"
             val requestBody = JSONObject().apply {
                 put("nombre", nuevoNombre)
@@ -109,6 +111,7 @@ data class Categoria(
             val request = Request.Builder()
                 .url(url)
                 .put(requestBody)
+                .header("Authorization", "Bearer $token")
                 .build()
 
             println("Enviando solicitud de modificación de categoría a: $url")
@@ -128,11 +131,12 @@ data class Categoria(
             })
         }
 
-        fun eliminarCategoria(id: Int, callback: (Boolean) -> Unit) {
+        fun eliminarCategoria(token: String, id: Int, callback: (Boolean) -> Unit) {
             val url = "$ENDPOINT_CATEGORIAS/$id"
             val request = Request.Builder()
                 .url(url)
                 .delete()
+                .header("Authorization", "Bearer $token")
                 .build()
 
             println("Enviando solicitud de borrado de categoría a: $url")

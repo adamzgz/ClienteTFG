@@ -20,22 +20,9 @@ class Login : AppCompatActivity() {
         val passwordInput: EditText = findViewById(R.id.editTextPassword)
         val loginButton: Button = findViewById(R.id.buttonLogin)
         val registerButton: Button = findViewById(R.id.buttonRegister)
-        val sharedPreferences = getSharedPreferences("com.example.clientetfgadamboulaiounemuoz", Context.MODE_PRIVATE)
-        val token = sharedPreferences.getString("token", "")
-        val rol = sharedPreferences.getString("role", "")
-       /* if(!token.isNullOrEmpty()) {
-           val intent = when (rol) {
-                "Cliente" -> Intent(this@Login, ListadoProductos::class.java)
-                "Empleado" -> Intent(this@Login, Vista_gestion::class.java)
-                 else-> null
-            }
-            intent?.let {
-                startActivity(it)
-                finish()
-            }
-        }
 
-*/
+        navigateIfLoggedIn()
+
         registerButton.setOnClickListener {
             val intent = Intent(this, Registro::class.java)
             startActivity(intent)
@@ -48,33 +35,50 @@ class Login : AppCompatActivity() {
             val usuario = Usuario("", "", "", username, password)
             Usuario.login(usuario) { success, token, role ->
                 if (success) {
-                    val sharedPreferences = getSharedPreferences("com.example.clientetfgadamboulaiounemuoz", Context.MODE_PRIVATE)
-                    with(sharedPreferences.edit()) {
-                        putString("token", token)
-                        putString("role",role)
-                        apply()
-                    }
-                    Log.i("token",token)
+                    saveCredentialsToSharedPreferences(token, role)
+                    Log.i("token", token)
 
-                    val intent = when (role) {
-                        "Cliente" -> Intent(this@Login, ListadoProductos::class.java)
-                        "Empleado" -> Intent(this@Login, Vista_gestion::class.java)
-                        else -> null
-                    }
-                    intent?.let {
-                        startActivity(it)
-                        finish()
-                    } ?: run {
-                        Toast.makeText(this@Login, "Rol del usuario desconocido: $role", Toast.LENGTH_SHORT).show()
-                    }
+                    navigateBasedOnRole(role)
                 } else {
                     runOnUiThread {
-                        Toast.makeText(this@Login, "Inicio de sesión fallido", Toast.LENGTH_SHORT)
-                            .show()
+                        Toast.makeText(this@Login, "Inicio de sesión fallido", Toast.LENGTH_SHORT).show()
                         loginButton.isEnabled = true
                     }
                 }
             }
+        }
+    }
+
+    private fun navigateIfLoggedIn() {
+        val sharedPreferences = getSharedPreferences("com.example.clientetfgadamboulaiounemuoz", Context.MODE_PRIVATE)
+        val token = sharedPreferences.getString("token", "")
+        val rol = sharedPreferences.getString("role", "")
+
+        if (!token.isNullOrEmpty()) {
+            navigateBasedOnRole(rol)
+        }
+    }
+
+    private fun navigateBasedOnRole(role: String?) {
+        val intent = when (role) {
+            "Cliente" -> Intent(this@Login, ListadoProductos::class.java)
+            "Empleado" -> Intent(this@Login, Vista_gestion::class.java)
+            else -> null
+        }
+        intent?.let {
+            startActivity(it)
+            finish()
+        } ?: run {
+            Toast.makeText(this@Login, "Rol del usuario desconocido: $role", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun saveCredentialsToSharedPreferences(token: String, role: String) {
+        val sharedPreferences = getSharedPreferences("com.example.clientetfgadamboulaiounemuoz", Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            putString("token", token)
+            putString("role", role)
+            apply()
         }
     }
 }

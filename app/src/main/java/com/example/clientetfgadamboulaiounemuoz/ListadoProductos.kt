@@ -1,17 +1,17 @@
 package com.example.clientetfgadamboulaiounemuoz
 
-import Producto
+
 import ProductoAdapter
 import com.example.clientetfgadamboulaiounemuoz.Clases.Categoria
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
+import com.example.clientetfgadamboulaiounemuoz.Clases.Producto
 
 class ListadoProductos : AppCompatActivity() {
 
@@ -32,7 +32,7 @@ class ListadoProductos : AppCompatActivity() {
         listView.adapter = adapter
 
         obtenerProductos()
-        obtenerCategorias()
+        /*obtenerCategorias()*/
 
         categoriasSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
@@ -61,7 +61,7 @@ class ListadoProductos : AppCompatActivity() {
         }
     }
 
-    private fun obtenerCategorias() {
+    /*private fun obtenerCategorias() {
         Categoria.obtenerCategorias { categoriasFromAPI ->
             if (categoriasFromAPI != null) {
                 this.categorias = listOf(Categoria(id = -1, nombre = "Todas")) + categoriasFromAPI
@@ -70,7 +70,7 @@ class ListadoProductos : AppCompatActivity() {
                 println("Error al cargar las categorías desde el servidor")
             }
         }
-    }
+    }*/
 
     private fun cargarCategoriasAlSpinner() {
         val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categorias.map { it.nombre })
