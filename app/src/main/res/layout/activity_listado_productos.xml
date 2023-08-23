@@ -26,6 +26,23 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Barra de búsqueda por nombre de producto -->
+    <EditText
+        android:id="@+id/searchEditText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:hint="Buscar producto..."
+        android:drawableStart="@android:drawable/ic_menu_search"
+        android:drawablePadding="12dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:elevation="2dp"
+        android:background="@android:drawable/editbox_background"
+        app:layout_constraintEnd_toStartOf="@+id/carritoImageview"
+        app:layout_constraintStart_toEndOf="@+id/otroImageview"
+        app:layout_constraintTop_toBottomOf="@+id/carritoImageview" />
+
     <!-- Spinner de categorías en la parte superior entre las dos imágenes -->
     <Spinner
         android:id="@+id/categoriaSpinner"
@@ -33,10 +50,9 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toStartOf="@+id/carritoImageview"
         app:layout_constraintStart_toEndOf="@+id/otroImageview"
-        app:layout_constraintTop_toBottomOf="@+id/otroImageview" />
+        app:layout_constraintTop_toBottomOf="@+id/searchEditText" />
 
     <!-- Lista de productos debajo del Spinner y las imágenes -->
-
     <ListView
         android:id="@+id/productListView"
         android:layout_width="match_parent"
@@ -51,9 +67,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="LISTADO DE PRODUCTOS"
-        app:layout_constraintBottom_toTopOf="@+id/categoriaSpinner"
+        app:layout_constraintBottom_toTopOf="@+id/searchEditText"
         app:layout_constraintEnd_toStartOf="@+id/carritoImageview"
         app:layout_constraintStart_toEndOf="@+id/otroImageview"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/otroImageview" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

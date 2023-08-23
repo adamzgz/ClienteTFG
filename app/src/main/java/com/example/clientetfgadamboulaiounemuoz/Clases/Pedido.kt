@@ -1,3 +1,5 @@
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.clientetfgadamboulaiounemuoz.API.URL
 import com.google.gson.Gson
 import okhttp3.*
@@ -8,6 +10,7 @@ import java.io.IOException
 import java.time.LocalDate
 
 data class Pedido(
+    val idPedido: Int?,
     val id_cliente: Int,
     val estado: String,
     val fecha: String
@@ -15,36 +18,85 @@ data class Pedido(
     companion object {
         private const val BASE_URL = URL.BASE_URL // URL base hardcoded
 
-        fun crearPedido(idCliente: Int, estado: EstadoPedido, callback: (Boolean) -> Unit) {
-            val url = "$BASE_URL/pedidos" // URL para crear pedido
-            val pedido = Pedido(idCliente, estado.name, LocalDate.now().toString())
-            val json = Gson().toJson(pedido)
+        fun comprobarPedidoEnProceso(token: String, callback: (Pedido?) -> Unit) {
+            val url = "$BASE_URL/secure/pedidos/enProceso"
 
-            val requestBody = json.toRequestBody("application/json".toMediaType())
             val request = Request.Builder()
                 .url(url)
-                .post(requestBody)
+                .header("Authorization", "Bearer $token") // Pasando el token en el header para autenticación
+                .get()
                 .build()
 
-            println("Enviando solicitud de creación de pedido a: $url")
+            println("Enviando solicitud para comprobar pedido en proceso a: $url")
 
             val client = OkHttpClient()
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
                     println("Error al enviar solicitud: ${e.message}")
-                    callback(false)
+                    callback(null)
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    val success = response.isSuccessful
-                    println("Respuesta recibida. Success = $success")
-                    callback(success)
+                    if(response.isSuccessful) {
+                        val responseBody = response.body?.string()
+                        val pedido = Gson().fromJson(responseBody, Pedido::class.java)
+                        println("Pedido en proceso encontrado: $pedido")
+                        callback(pedido)
+                    } else {
+                        // Aquí se maneja el caso cuando no hay un pedido en proceso y necesitas crear uno
+                        println("No se encontró un pedido en proceso para el cliente.")
+                        crearPedidoEnProceso(token) { nuevoPedido ->
+                            if(nuevoPedido != null) {
+                                println("Se creó un nuevo pedido en proceso: $nuevoPedido")
+                                callback(nuevoPedido)
+                            } else {
+                                println("Error al crear el nuevo pedido.")
+                                callback(null)
+                            }
+                        }
+                    }
                 }
             })
         }
 
+        fun crearPedidoEnProceso(token: String, callback: (Pedido?) -> Unit) {
+            val url = "$BASE_URL/secure/pedidos"
+
+            val requestBody = JSONObject().apply {
+                put("estado", Pedido.EstadoPedido.EN_PROCESO.name)
+            }.toString().toRequestBody("application/json".toMediaType())
+
+            val request = Request.Builder()
+                .url(url)
+                .header("Authorization", "Bearer $token") // Pasando el token en el header para autenticación
+                .post(requestBody)
+                .build()
+
+            println("Enviando solicitud para crear pedido en proceso a: $url")
+
+            val client = OkHttpClient()
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    println("Error al enviar solicitud: ${e.message}")
+                    callback(null)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    if(response.isSuccessful) {
+                        val responseBody = response.body?.string()
+                        val nuevoPedido = Gson().fromJson(responseBody, Pedido::class.java)
+                        callback(nuevoPedido)
+                    } else {
+                        println("Error al crear el nuevo pedido.")
+                        callback(null)
+                    }
+                }
+            })
+        }
+
+
         fun borrarPedido(id: Int, callback: (Boolean) -> Unit) {
-            val url = "$BASE_URL/pedidos/eliminar/$id" // URL para borrar pedido
+            val url = "$BASE_URL/secure/pedidos/eliminar/$id" // URL para borrar pedido
             val request = Request.Builder()
                 .url(url)
                 .delete()
@@ -68,7 +120,7 @@ data class Pedido(
         }
 
         fun modificarPedido(id: Int, nuevoEstado: EstadoPedido, callback: (Boolean) -> Unit) {
-            val url = "$BASE_URL/pedidos/actualizar/$id" // URL para modificar pedido
+            val url = "$BASE_URL/secure/pedidos/actualizar/$id" // URL para modificar pedido
             val requestBody = JSONObject().apply {
                 put("estado", nuevoEstado.name)
             }.toString().toRequestBody("application/json".toMediaType())
@@ -96,7 +148,7 @@ data class Pedido(
         }
 
         fun obtenerPedidos(callback: (List<Pedido>?) -> Unit) {
-            val url = "$BASE_URL/pedidos" // URL para obtener pedidos
+            val url = "$BASE_URL/secure/pedidos" // URL para obtener pedidos
             val request = Request.Builder()
                 .url(url)
                 .get()
@@ -121,11 +173,12 @@ data class Pedido(
             })
         }
 
-        enum class EstadoPedido {
-            PENDIENTE,   // pedido realizado por el cliente
-            ENVIADO,     // pedido enviado
-            ENTREGADO,   // pedido entregado
-            EN_PROCESO   // en el carrito
-        }
+
+    }
+    enum class EstadoPedido {
+        PENDIENTE,   // pedido realizado por el cliente
+        ENVIADO,     // pedido enviado
+        ENTREGADO,   // pedido entregado
+        EN_PROCESO   // en el carrito
     }
 }

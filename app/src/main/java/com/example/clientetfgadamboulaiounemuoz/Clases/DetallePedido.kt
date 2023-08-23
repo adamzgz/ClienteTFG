@@ -9,24 +9,26 @@ import org.json.JSONObject
 import java.io.IOException
 
 data class DetallePedido(
-    val id_pedido: Int,
-    val id_producto: Int,
-    val cantidad: Int
+    val id: Int? = null,
+    val idPedido: Int,
+    val idProducto: Int,
+    var cantidad: Int
 ) {
     companion object {
         private const val BASE_URL = URL.BASE_URL
-        private const val ENDPOINT_DETALLES_PEDIDOS = "$BASE_URL/detalles-pedidos"
-        private const val ENDPOINT_INSERTAR_DETALLE_PEDIDO = "$ENDPOINT_DETALLES_PEDIDOS/insertar"
-        private const val ENDPOINT_BORRAR_DETALLE_PEDIDO = "$ENDPOINT_DETALLES_PEDIDOS/borrar/{id}"
-        private const val ENDPOINT_ACTUALIZAR_DETALLE_PEDIDO = "$ENDPOINT_DETALLES_PEDIDOS/actualizar/{id}"
+        private const val ENDPOINT_DETALLES_PEDIDOS = "$BASE_URL/secure/detalles-pedidos"
+        private const val ENDPOINT_INSERTAR_DETALLE_PEDIDO = "$ENDPOINT_DETALLES_PEDIDOS"
+        private const val ENDPOINT_BORRAR_DETALLE_PEDIDO = "$ENDPOINT_DETALLES_PEDIDOS/{id}"
+        private const val ENDPOINT_ACTUALIZAR_DETALLE_PEDIDO = "$ENDPOINT_DETALLES_PEDIDOS/{id}"
 
-        fun insertarDetallePedido(detallePedido: DetallePedido, callback: (Boolean) -> Unit) {
+        fun insertarDetallePedido(token: String, detallePedido: DetallePedido, callback: (Boolean) -> Unit) {
             val url = ENDPOINT_INSERTAR_DETALLE_PEDIDO
             val json = Gson().toJson(detallePedido)
 
             val requestBody = json.toRequestBody("application/json".toMediaType())
             val request = Request.Builder()
                 .url(url)
+                .header("Authorization", "Bearer $token")
                 .post(requestBody)
                 .build()
 
@@ -47,10 +49,11 @@ data class DetallePedido(
             })
         }
 
-        fun borrarDetallePedido(id: Int, callback: (Boolean) -> Unit) {
+        fun borrarDetallePedido(token: String, id: Int, callback: (Boolean) -> Unit) {
             val url = ENDPOINT_BORRAR_DETALLE_PEDIDO.replace("{id}", id.toString())
             val request = Request.Builder()
                 .url(url)
+                .header("Authorization", "Bearer $token")
                 .delete()
                 .build()
 
@@ -71,7 +74,7 @@ data class DetallePedido(
             })
         }
 
-        fun modificarDetallePedido(id: Int, nuevaCantidad: Int, callback: (Boolean) -> Unit) {
+        fun modificarDetallePedido(token: String, id: Int, nuevaCantidad: Int, callback: (Boolean) -> Unit) {
             val url = ENDPOINT_ACTUALIZAR_DETALLE_PEDIDO.replace("{id}", id.toString())
             val requestBody = JSONObject().apply {
                 put("cantidad", nuevaCantidad)
@@ -79,6 +82,7 @@ data class DetallePedido(
 
             val request = Request.Builder()
                 .url(url)
+                .header("Authorization", "Bearer $token")
                 .put(requestBody)
                 .build()
 

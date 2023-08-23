@@ -5,23 +5,20 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import com.bumptech.glide.Glide
+import com.example.clientetfgadamboulaiounemuoz.API.URL
 import com.example.clientetfgadamboulaiounemuoz.Clases.Producto
 import com.example.clientetfgadamboulaiounemuoz.R
+import com.squareup.picasso.Picasso
+import android.view.ContextMenu
+import android.view.Menu
 
 class ProductoAdapter(private val context: Context, private val productos: List<Producto>) : BaseAdapter() {
 
-    override fun getCount(): Int {
-        return productos.size
-    }
+    override fun getCount(): Int = productos.size
 
-    override fun getItem(position: Int): Any {
-        return productos[position]
-    }
+    override fun getItem(position: Int): Any = productos[position]
 
-    override fun getItemId(position: Int): Long {
-        return position.toLong()
-    }
+    override fun getItemId(position: Int): Long = position.toLong()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val view: View
@@ -38,29 +35,36 @@ class ProductoAdapter(private val context: Context, private val productos: List<
 
         val producto = productos[position]
         viewHolder.bind(producto)
+
+        // Registrar la vista para mostrar el menú contextual
+        view.setOnCreateContextMenuListener(viewHolder)
+
         return view
     }
 
-    private class ViewHolder(view: View) {
+    inner class ViewHolder(view: View) : View.OnCreateContextMenuListener {
         private val nombreTextView = view.findViewById<TextView>(R.id.nombreTextView)
         private val descripcionTextView = view.findViewById<TextView>(R.id.descripcionTextView)
         private val precioTextView = view.findViewById<TextView>(R.id.precioTextView)
-        private val categoriaTextView = view.findViewById<TextView>(R.id.categoriaTextView)
         private val imagenImageView = view.findViewById<ImageView>(R.id.imagenImageView)
 
+        private var currentProducto: Producto? = null
+
         fun bind(producto: Producto) {
+            currentProducto = producto
             nombreTextView.text = producto.nombre
             descripcionTextView.text = producto.descripcion
-            precioTextView.text = producto.precio.toString()
-            categoriaTextView.text = producto.idCategoria.toString()
+            precioTextView.text = "${producto.precio} €"
 
-            val imageUrl = "http://127.0.0.1:8080/img_productos/${producto.imagen}"
+            val imageUrl = "${URL.BASE_URL}/img_productos/${producto.imagen}"
+            Picasso.get().load(imageUrl).placeholder(R.drawable.logo).error(R.drawable.noimage).into(imagenImageView)
+        }
+        fun getCurrentProducto(): Producto? {
+            return currentProducto
+        }
 
-            Glide.with(imagenImageView.context)
-                .load(imageUrl)
-                .placeholder(R.drawable.logo)  // Muestra una imagen placeholder mientras la imagen se está descargando.
-                .error(R.drawable.noimage)  // Muestra esta imagen si hay un error al descargar.
-                .into(imagenImageView)
+        override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
+
         }
     }
 }

@@ -123,7 +123,7 @@ data class Producto(
         }
 
         fun obtenerProductoPorId(token: String, id: Int, callback: (Producto?) -> Unit) {
-            val url = "$BASE_URL/productos/$id"
+            val url = "$BASE_URL/secure/productos/$id"
             val request = Request.Builder()
                 .url(url)
                 .header("Authorization", "Bearer $token")

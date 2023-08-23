@@ -17,6 +17,7 @@ class GestionProductosAdapter(
     private val onItemLongClicked: (Producto) -> Unit
 ) : RecyclerView.Adapter<GestionProductosAdapter.ProductoViewHolder>() {
 
+    // Actualizar los productos y notificar al adapter
     fun updateProductos(newProductos: List<Producto>) {
         productos = newProductos
         notifyDataSetChanged()
@@ -53,7 +54,7 @@ class GestionProductosAdapter(
             val imageUrl = "${URL.BASE_URL}/img_productos/${producto.imagen}"
             Picasso.get().load(imageUrl).error(R.drawable.noimage).into(imgProducto)
 
-            txtNombre.text = producto.nombre
+            txtNombre.text = producto.nombre + " con el id " + producto.id
             txtPrecio.text = "${producto.precio} €"
 
             // Obtener nombre de la categoría
@@ -63,11 +64,11 @@ class GestionProductosAdapter(
             }
         }
 
-
         override fun onCreateContextMenu(menu: ContextMenu?, v: View?, menuInfo: ContextMenu.ContextMenuInfo?) {
             menu?.add(Menu.NONE, R.id.edit_producto, 0, "Editar producto")
             menu?.add(Menu.NONE, R.id.delete_producto, 1, "Eliminar producto")
         }
+
     }
 
     private fun getTokenFromSharedPreferences(): String {
