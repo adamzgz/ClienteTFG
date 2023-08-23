@@ -1,16 +1,18 @@
 package com.example.clientetfgadamboulaiounemuoz
 
-
 import ProductoAdapter
-import com.example.clientetfgadamboulaiounemuoz.Clases.Categoria
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.Spinner
 import androidx.appcompat.app.AppCompatActivity
+import com.example.clientetfgadamboulaiounemuoz.Clases.Categoria
 import com.example.clientetfgadamboulaiounemuoz.Clases.Producto
 
 class ListadoProductos : AppCompatActivity() {
@@ -32,7 +34,6 @@ class ListadoProductos : AppCompatActivity() {
         listView.adapter = adapter
 
         obtenerProductos()
-        /*obtenerCategorias()*/
 
         categoriasSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
@@ -44,6 +45,36 @@ class ListadoProductos : AppCompatActivity() {
                 // No se hace nada aquí
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_options, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_logout -> {
+                logout()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun logout() {
+        // Limpiar SharedPreferences
+        val sharedPreferences = getSharedPreferences("com.example.clientetfgadamboulaiounemuoz", Context.MODE_PRIVATE)
+        with(sharedPreferences.edit()) {
+            remove("token")
+            remove("rol")  // Si utilizas "rol" en esta clase. Si no, puedes eliminar esta línea.
+            apply()
+        }
+
+        // Iniciar actividad de inicio de sesión
+        val intent = Intent(this, Login::class.java)
+        startActivity(intent)
+        finish()  // Finaliza la actividad actual
     }
 
     private fun obtenerProductos() {
@@ -60,17 +91,6 @@ class ListadoProductos : AppCompatActivity() {
             }
         }
     }
-
-    /*private fun obtenerCategorias() {
-        Categoria.obtenerCategorias { categoriasFromAPI ->
-            if (categoriasFromAPI != null) {
-                this.categorias = listOf(Categoria(id = -1, nombre = "Todas")) + categoriasFromAPI
-                cargarCategoriasAlSpinner()
-            } else {
-                println("Error al cargar las categorías desde el servidor")
-            }
-        }
-    }*/
 
     private fun cargarCategoriasAlSpinner() {
         val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categorias.map { it.nombre })

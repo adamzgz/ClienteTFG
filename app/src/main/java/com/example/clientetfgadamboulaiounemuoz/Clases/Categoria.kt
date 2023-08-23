@@ -10,9 +10,14 @@ import java.io.IOException
 
 data class Categoria(
     val id: Int,
-    val nombre: String
+    var nombre: String
 ) : java.io.Serializable
+
+
 {
+    override fun toString(): String {
+        return nombre
+    }
     companion object {
         private const val BASE_URL = URL.BASE_URL
         private const val ENDPOINT_CATEGORIAS = "$BASE_URL/secure/categorias"
@@ -102,10 +107,10 @@ data class Categoria(
             })
         }
 
-        fun actualizarCategoria(token: String, id: Int, nuevoNombre: String, callback: (Boolean) -> Unit) {
-            val url = "$ENDPOINT_CATEGORIAS/$id"
+        fun actualizarCategoria(token: String, categoria : Categoria, callback: (Boolean) -> Unit) {
+            val url = "$ENDPOINT_CATEGORIAS/${categoria.id}"
             val requestBody = JSONObject().apply {
-                put("nombre", nuevoNombre)
+                put("nombre", categoria.nombre)
             }.toString().toRequestBody("application/json".toMediaType())
 
             val request = Request.Builder()

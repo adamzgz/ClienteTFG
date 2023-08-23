@@ -9,18 +9,25 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.example.clientetfgadamboulaiounemuoz.API.URL
 import com.example.clientetfgadamboulaiounemuoz.Clases.Categoria
 import com.example.clientetfgadamboulaiounemuoz.Clases.Producto
+import com.squareup.picasso.Picasso
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 
 class addProducto : AppCompatActivity() {
+
     private val SELECT_IMAGE_REQUEST = 1
     private var selectedImageFileName: String? = null
+    private var isEditMode = false
+    private var currentProducto: Producto? = null
 
     private fun getTokenFromSharedPreferences(): String? {
         val sharedPreferences = getSharedPreferences("com.example.clientetfgadamboulaiounemuoz", Context.MODE_PRIVATE)
@@ -31,18 +38,25 @@ class addProducto : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_producto)
 
+        currentProducto = intent.getSerializableExtra("productoSeleccionado") as Producto?
+        val btnEnviarProducto = findViewById<Button>(R.id.btnEnviarProducto)
+
+        if (currentProducto != null) {
+            isEditMode = true
+            populateProductoData(currentProducto!!)
+            btnEnviarProducto.text = "Editar Producto"
+        }
+
         val spinnerCategorias = findViewById<Spinner>(R.id.spinnerCategoria)
         val token = getTokenFromSharedPreferences()
-        print("el token es $token")
         token?.let {
             Categoria.obtenerCategorias(it) { categorias ->
                 runOnUiThread {
                     categorias?.let {
-                        println(categorias.size)
-                        val adapter = ArrayAdapter(
+                        val adapter = ArrayAdapter<Categoria>(
                             this,
                             android.R.layout.simple_spinner_item,
-                            it.map { categoria -> categoria.nombre }
+                            categorias
                         )
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         spinnerCategorias.adapter = adapter
@@ -56,15 +70,37 @@ class addProducto : AppCompatActivity() {
             startActivityForResult(intent, SELECT_IMAGE_REQUEST)
         }
 
-        findViewById<Button>(R.id.btnEnviarProducto).setOnClickListener {
+        btnEnviarProducto.setOnClickListener {
             if (validarFormulario()) {
                 val imageView = findViewById<ImageView>(R.id.imageViewProducto)
-                crearProducto()
-                imageView.drawable?.let {
-                    enviarImagenAapi((imageView.drawable as BitmapDrawable).bitmap, selectedImageFileName ?: "default.jpg")
+                if (selectedImageFileName != null && (selectedImageFileName != currentProducto?.imagen || !isEditMode)) {
+                    enviarImagenAapi((imageView.drawable as BitmapDrawable).bitmap, selectedImageFileName!!) { isSuccessful ->
+                        if (isSuccessful) {
+                            if (isEditMode) {
+                                editarProducto()
+                            } else {
+                                crearProducto()
+                            }
+                        }
+                    }
+                } else if (isEditMode) {
+                    editarProducto()
+                } else {
+                    mostrarDialogoSinImagen()
                 }
             }
         }
+    }
+
+    private fun populateProductoData(producto: Producto) {
+        findViewById<EditText>(R.id.editTextNombre).setText(producto.nombre)
+        findViewById<EditText>(R.id.editTextDescripcion).setText(producto.descripcion)
+        findViewById<EditText>(R.id.editTextPrecio).setText(producto.precio.toString())
+
+        val imageUrl = "${URL.BASE_URL}/img_productos/${producto.imagen}"
+        Picasso.get().load(imageUrl).into(findViewById<ImageView>(R.id.imageViewProducto))
+
+        selectedImageFileName = producto.imagen
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -100,7 +136,7 @@ class addProducto : AppCompatActivity() {
         return result
     }
 
-    private fun enviarImagenAapi(bitmap: Bitmap, fileName: String) {
+    private fun enviarImagenAapi(bitmap: Bitmap, fileName: String, callback: (Boolean) -> Unit) {
         val byteArrayOutputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
         val requestBody = RequestBody.create("image/jpeg".toMediaTypeOrNull(), byteArrayOutputStream.toByteArray())
@@ -113,85 +149,81 @@ class addProducto : AppCompatActivity() {
 
         val request = Request.Builder()
             .url(URL.Companion.BASE_URL + "/secure/add_img_productos")
-            .header("Authorization", "Bearer ${getTokenFromSharedPreferences()}")
             .post(multipartBody)
             .build()
 
-        val btnEnviarProducto = findViewById<Button>(R.id.btnEnviarProducto)
-        btnEnviarProducto.isEnabled = false // Deshabilita el botón mientras espera respuesta
-
-        val client = OkHttpClient()
-        client.newCall(request).enqueue(object : Callback {
+        OkHttpClient().newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                runOnUiThread {
-                    println("Error al enviar la imagen: ${e.message}")
-                    btnEnviarProducto.isEnabled = true // Habilita el botón si hubo un error
-                }
+                callback(false)
             }
 
             override fun onResponse(call: Call, response: Response) {
-                runOnUiThread {
-                    println("Respuesta recibida. Código = ${response.code}")
-                    if (response.isSuccessful) {
-                        finish() // Cierra la actividad si todo fue exitoso
-                    } else {
-                        btnEnviarProducto.isEnabled = true // Habilita el botón si la respuesta no fue exitosa
-                    }
-                }
+                callback(response.isSuccessful)
             }
         })
-    }
-
-    private fun crearProducto() {
-        val nombre = findViewById<EditText>(R.id.editTextNombre).text.toString()
-        val descripcion = findViewById<EditText>(R.id.editTextDescripcion).text.toString()
-        val precio = findViewById<EditText>(R.id.editTextPrecio).text.toString().toDouble()
-        val categoria = findViewById<Spinner>(R.id.spinnerCategoria).selectedItem.toString()
-        val imagen = selectedImageFileName ?: "imagen_producto.jpg"
-        val idCategoria = 1
-
-        val producto = Producto(nombre, descripcion, precio, idCategoria, imagen)
-
-        val btnEnviarProducto = findViewById<Button>(R.id.btnEnviarProducto)
-        btnEnviarProducto.isEnabled = false // Deshabilita el botón mientras espera respuesta
-
-        getTokenFromSharedPreferences()?.let { token ->
-            Producto.crearProducto(token, producto) { isSuccess ->
-                runOnUiThread {
-                    if (isSuccess) {
-                        println("Producto creado con éxito!")
-                        finish() // Cierra la actividad si el producto se creó con éxito
-                    } else {
-                        println("Error al crear el producto.")
-                        btnEnviarProducto.isEnabled = true // Habilita el botón si hubo un error
-                    }
-                }
-            }
-        }
     }
 
     private fun validarFormulario(): Boolean {
         val nombre = findViewById<EditText>(R.id.editTextNombre).text.toString()
         val descripcion = findViewById<EditText>(R.id.editTextDescripcion).text.toString()
-        val precioStr = findViewById<EditText>(R.id.editTextPrecio).text.toString()
+        val precio = findViewById<EditText>(R.id.editTextPrecio).text.toString()
 
-        if (nombre.isEmpty()) {
-            showToastMessage("El nombre no puede estar vacío.")
-            return false
-        }
-        if (descripcion.isEmpty()) {
-            showToastMessage("La descripción no puede estar vacía.")
-            return false
-        }
-        if (precioStr.isEmpty()) {
-            showToastMessage("El precio no puede estar vacío.")
+        if (nombre.isEmpty() || descripcion.isEmpty() || precio.isEmpty()) {
+            Toast.makeText(this, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show()
             return false
         }
 
         return true
     }
 
-    private fun showToastMessage(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    private fun crearProducto() {
+        // Aquí tendrías el código para crear un producto. Asegúrate de completarlo según tu lógica de negocio.
+    }
+
+    private fun editarProducto() {
+        val producto = Producto(
+            id = currentProducto!!.id,
+            nombre = findViewById<EditText>(R.id.editTextNombre).text.toString(),
+            descripcion = findViewById<EditText>(R.id.editTextDescripcion).text.toString(),
+            precio = findViewById<EditText>(R.id.editTextPrecio).text.toString().toDouble(),
+            idCategoria = (findViewById<Spinner>(R.id.spinnerCategoria).selectedItem as Categoria).id,
+            imagen = selectedImageFileName!!
+        )
+
+        val imageView = findViewById<ImageView>(R.id.imageViewProducto)
+        val bitmap = (imageView.drawable as BitmapDrawable).bitmap
+        val file = convertBitmapToFile(bitmap, selectedImageFileName!!)
+
+        getTokenFromSharedPreferences()?.let { token ->
+            Producto.modificarProducto(token, producto.id, producto, file) { isSuccess ->
+                runOnUiThread {
+                    if (isSuccess) {
+                        println("Producto editado con éxito!")
+                        finish()
+                    } else {
+                        println("Error al editar el producto.")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun convertBitmapToFile(bitmap: Bitmap, fileName: String): File {
+        // Aquí conviertes tu bitmap a un archivo. Puedes almacenarlo temporalmente.
+        val file = File(externalCacheDir, fileName)
+        val fos = FileOutputStream(file)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+        fos.flush()
+        fos.close()
+        return file
+    }
+
+
+    private fun mostrarDialogoSinImagen() {
+        AlertDialog.Builder(this)
+            .setTitle("Imagen faltante")
+            .setMessage("Por favor, selecciona una imagen para el producto antes de continuar.")
+            .setPositiveButton("Ok") { _, _ -> }
+            .show()
     }
 }

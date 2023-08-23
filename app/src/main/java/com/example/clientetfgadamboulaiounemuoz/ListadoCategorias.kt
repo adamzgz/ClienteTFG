@@ -65,11 +65,11 @@ class ListadoCategorias : AppCompatActivity() {
     }
 
     // Registrar el menú contextual para el RecyclerView
-    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
+    /*override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
         super.onCreateContextMenu(menu, v, menuInfo)
         menu.add(0, v.id, 0, "Editar categoría")
         menu.add(0, v.id, 1, "Eliminar categoría")
-    }
+    }*/
 
     // Acciones al seleccionar una opción del menú contextual
     override fun onContextItemSelected(item: MenuItem): Boolean {
@@ -111,4 +111,9 @@ class ListadoCategorias : AppCompatActivity() {
             }
         }
     }
+    override fun onResume() {
+        super.onResume()
+        loadCategorias()
+    }
+
 }

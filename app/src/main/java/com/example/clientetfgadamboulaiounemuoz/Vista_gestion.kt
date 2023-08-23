@@ -12,21 +12,26 @@ class Vista_gestion : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vista_gestion)
 
-        // Agregar un listener al botón btnAnadirProducto
+
         findViewById<Button>(R.id.btnAnadirProducto).setOnClickListener {
             val intent = Intent(this, addProducto::class.java) // Crea un Intent para iniciar addProducto
-            startActivity(intent) // Inicia addProducto
+            startActivity(intent)
         }
-        // Agregar un listener al botón Añadir cateoria
+
         findViewById<Button>(R.id.btnAnadirCategoria).setOnClickListener {
             val intent = Intent(this, addCategoria::class.java) // Crea un Intent para iniciar addProducto
-            startActivity(intent) // Inicia addProducto
+            startActivity(intent)
         }
-        // Agregar un listener al botón ver categorias
+
         findViewById<Button>(R.id.btnVerCategorias).setOnClickListener {
             val intent = Intent(this, ListadoCategorias::class.java) // Crea un Intent para iniciar addProducto
-            startActivity(intent) // Inicia addProducto
+            startActivity(intent)
         }
+        findViewById<Button>(R.id.btnGestionProductos).setOnClickListener {
+            val intent = Intent(this, ListadoProductoGestion::class.java) // Crea un Intent para iniciar addProducto
+            startActivity(intent)
+        }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

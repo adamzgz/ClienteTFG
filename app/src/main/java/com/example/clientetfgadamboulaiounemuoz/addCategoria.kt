@@ -13,28 +13,39 @@ class addCategoria : AppCompatActivity() {
 
     private var isEditing: Boolean = false
     private var currentCategoria: Categoria? = null
+    private lateinit var btnAccionCategoria: Button // Define btnAccionCategoria a nivel de clase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_categoria)
 
-        val btnAccionCategoria = findViewById<Button>(R.id.btnCrearCategoria)
+        btnAccionCategoria = findViewById(R.id.btnCrearCategoria)
 
-        // Verificar si hay un intent con una categoría para editar
-        currentCategoria = intent.getSerializableExtra("categoria") as? Categoria
+        initializeView()
+        handleButtonAction()
+    }
+
+    private fun initializeView() {
+        currentCategoria = intent.getSerializableExtra("categoriaSeleccionada") as? Categoria
+        println(currentCategoria?.nombre)
         if (currentCategoria != null) {
             isEditing = true
             findViewById<EditText>(R.id.editTextCategoriaNombre).setText(currentCategoria!!.nombre)
             btnAccionCategoria.text = "Actualizar"
         }
+    }
 
+    private fun handleButtonAction() {
         btnAccionCategoria.setOnClickListener {
+            btnAccionCategoria.isEnabled = false // Desactivar botón al iniciar operación
             if (validarFormulario()) {
                 if (isEditing) {
                     confirmarActualizacion()
                 } else {
                     crearCategoria()
                 }
+            } else {
+                btnAccionCategoria.isEnabled = true // Reactivar botón si validación falla
             }
         }
     }
@@ -56,7 +67,7 @@ class addCategoria : AppCompatActivity() {
                         finish() // Cierra la actividad si la categoría se creó con éxito
                     } else {
                         showToastMessage("Error al crear la categoría.")
-                        findViewById<Button>(R.id.btnCrearCategoria).isEnabled = true
+                        btnAccionCategoria.isEnabled = true
                     }
                 }
             }
@@ -65,17 +76,17 @@ class addCategoria : AppCompatActivity() {
 
     private fun actualizarCategoria() {
         val nombre = findViewById<EditText>(R.id.editTextCategoriaNombre).text.toString()
-
+        currentCategoria!!.nombre = nombre
         getTokenFromSharedPreferences()?.let { token ->
             currentCategoria?.let { categoria ->
-                Categoria.actualizarCategoria(token, categoria.id, nombre) { isSuccess ->
+                Categoria.actualizarCategoria(token, categoria) { isSuccess ->
                     runOnUiThread {
                         if (isSuccess) {
                             showToastMessage("Categoría actualizada con éxito!")
                             finish() // Cierra la actividad si la categoría se actualizó con éxito
                         } else {
                             showToastMessage("Error al actualizar la categoría.")
-                            findViewById<Button>(R.id.btnCrearCategoria).isEnabled = true
+                            btnAccionCategoria.isEnabled = true
                         }
                     }
                 }

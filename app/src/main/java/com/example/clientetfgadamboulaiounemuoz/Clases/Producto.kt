@@ -6,16 +6,19 @@ import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
+import java.io.File
 import java.io.IOException
+import java.io.Serializable
 import java.math.BigDecimal
 
 data class Producto(
+    val id: Int,
     val nombre: String,
     val descripcion: String,
     val precio: Double,
     val idCategoria: Int,
     val imagen: String
-) {
+) : Serializable {
     companion object {
         private const val BASE_URL = URL.BASE_URL // URL base hardcoded
 
@@ -43,7 +46,7 @@ data class Producto(
         }
 
         fun borrarProducto(token: String, id: Int, callback: (Boolean) -> Unit) {
-            val url = "$BASE_URL/productos/$id"
+            val url = "$BASE_URL/secure/productos/$id"
             val request = Request.Builder()
                 .url(url)
                 .header("Authorization", "Bearer $token")
@@ -62,15 +65,22 @@ data class Producto(
             })
         }
 
-        fun modificarProducto(token: String, id: Int, nuevoProducto: Producto, callback: (Boolean) -> Unit) {
-            val url = "$BASE_URL/productos/$id"
-            val json = Gson().toJson(nuevoProducto)
+        fun modificarProducto(token: String, id: Int, nuevoProducto: Producto, imagen: File?, callback: (Boolean) -> Unit) {
+            val url = "$BASE_URL/secure/productos/$id"
 
-            val requestBody = json.toRequestBody("application/json".toMediaType())
+            val multipartBody = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("productoData", Gson().toJson(nuevoProducto))
+
+            imagen?.let {
+                val requestBody = RequestBody.create("image/*".toMediaType(), it)
+                multipartBody.addFormDataPart("imagenProducto", it.name, requestBody)
+            }
+
             val request = Request.Builder()
                 .url(url)
                 .header("Authorization", "Bearer $token")
-                .put(requestBody)
+                .put(multipartBody.build())
                 .build()
 
             val client = OkHttpClient()
@@ -85,8 +95,9 @@ data class Producto(
             })
         }
 
+
         fun obtenerProductos(token: String, callback: (List<Producto>?) -> Unit) {
-            val url = "$BASE_URL/productos"
+            val url = "$BASE_URL/secure/productos"
             val request = Request.Builder()
                 .url(url)
                 .header("Authorization", "Bearer $token")
