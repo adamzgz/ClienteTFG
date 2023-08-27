@@ -36,6 +36,12 @@ class ListadoProductos : AppCompatActivity() {
         adapter = ProductoAdapter(this, productos)
         listView.adapter = adapter
 
+        findViewById<ImageView>(R.id.carritoImageview).setOnClickListener {
+            val intent = Intent(this, CarritoCompra::class.java)
+            startActivity(intent)
+        }
+
+
         obtenerProductos()
         obtenerCategorias()
 
@@ -80,9 +86,16 @@ class ListadoProductos : AppCompatActivity() {
                 logout()
                 true
             }
+            R.id.edit_perfil -> {
+                val intent = Intent(this, Registro::class.java)
+                intent.putExtra("EDITAR_PERFIL", true) // Añadir un booleano para saber que estamos en modo de edición
+                startActivity(intent)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
+
 
     private fun logout() {
         // Limpiar SharedPreferences
@@ -186,27 +199,34 @@ class ListadoProductos : AppCompatActivity() {
     }
 
     private fun agregarProductoAlCarrito(idProducto: Int) {
-
         // Comprobar si hay un pedido en proceso
-        Pedido.comprobarPedidoEnProceso(getToken()) { pedidoEnProceso ->
-            if (pedidoEnProceso != null) {
-                // Si hay un pedido en proceso, añadir el producto al pedido existente
-                val detalle = DetallePedido(idPedido = pedidoEnProceso.idPedido!!, idProducto = idProducto, cantidad = 1)
-                DetallePedido.insertarDetallePedido(getToken(), detalle) { success ->
-                    if (success) {
-                        println("Producto añadido al carrito exitosamente.")
-                        // Actualizar la interfaz del usuario o mostrar un mensaje si es necesario
-                    } else {
-                        println("Error al añadir el producto al carrito.")
-                        // Manejar el error y notificar al usuario
+        Pedido.comprobarPedidoEnProceso(getToken(),
+            { pedidoEnProceso ->
+                if (pedidoEnProceso != null) {
+                    val detalle = DetallePedido(
+                        0,
+                        idPedido = pedidoEnProceso.idPedido!!,
+                        idProducto = idProducto,
+                        cantidad = 1
+                    )
+                    DetallePedido.insertarDetallePedido(getToken(), detalle) { success ->
+                        if (success) {
+                            println("Producto añadido al carrito exitosamente.")
+                        } else {
+                            println("Error al añadir el producto al carrito.")
+                        }
                     }
+                } else {
+                    println("Error al obtener el pedido en proceso.")
                 }
-            } else {
-                println("Error al obtener el pedido en proceso.")
-                // Manejar el error y notificar al usuario
+            },
+            {
+                println("Error al crear un nuevo pedido, intenta nuevamente.")
             }
-        }
+        )
+
     }
+
     override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenu.ContextMenuInfo?) {
         super.onCreateContextMenu(menu, v, menuInfo)
         menuInflater.inflate(R.menu.add_carrito, menu) // Replace 'your_context_menu' with your actual context menu XML filename

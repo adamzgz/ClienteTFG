@@ -20,6 +20,7 @@ data class DetallePedido(
         private const val ENDPOINT_INSERTAR_DETALLE_PEDIDO = "$ENDPOINT_DETALLES_PEDIDOS"
         private const val ENDPOINT_BORRAR_DETALLE_PEDIDO = "$ENDPOINT_DETALLES_PEDIDOS/{id}"
         private const val ENDPOINT_ACTUALIZAR_DETALLE_PEDIDO = "$ENDPOINT_DETALLES_PEDIDOS/{id}"
+        private const val ENDPOINT_OBTENER_DETALLES_POR_PEDIDO = "$ENDPOINT_DETALLES_PEDIDOS/{idPedido}"
 
         fun insertarDetallePedido(token: String, detallePedido: DetallePedido, callback: (Boolean) -> Unit) {
             val url = ENDPOINT_INSERTAR_DETALLE_PEDIDO
@@ -99,6 +100,37 @@ data class DetallePedido(
                     val success = response.isSuccessful
                     println("Respuesta recibida. Success = $success")
                     callback(success)
+                }
+            })
+        }
+        fun obtenerDetallesPorPedido(token: String, idPedido: Int, callback: (List<DetallePedido>?) -> Unit) {
+            val url = ENDPOINT_OBTENER_DETALLES_POR_PEDIDO.replace("{idPedido}", idPedido.toString())
+            val request = Request.Builder()
+                .url(url)
+                .header("Authorization", "Bearer $token")
+                .get()
+                .build()
+
+            println("Enviando solicitud para obtener detalles de pedido a: $url")
+
+            val client = OkHttpClient()
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    println("Error al enviar solicitud: ${e.message}")
+                    callback(null)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    val responseBody = response.body?.string()
+
+                    if (response.isSuccessful && responseBody != null) {
+                        val detalles = Gson().fromJson(responseBody, Array<DetallePedido>::class.java).toList()
+                        println("Detalles de pedido obtenidos con éxito.")
+                        callback(detalles)
+                    } else {
+                        println("No se pudo obtener los detalles del pedido. Código de respuesta: ${response.code}")
+                        callback(null)
+                    }
                 }
             })
         }

@@ -32,7 +32,9 @@ class Login : AppCompatActivity() {
             loginButton.isEnabled = false
             val username = usernameInput.text.toString()
             val password = passwordInput.text.toString()
-            val usuario = Usuario("", "", "", username, password)
+            val usuario =  Usuario()
+            usuario.email = username
+            usuario.contraseña = password
             Usuario.login(usuario) { success, token, role ->
                 if (success) {
                     saveCredentialsToSharedPreferences(token, role)

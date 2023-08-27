@@ -7,13 +7,16 @@ import org.json.JSONObject
 import java.io.IOException
 
 data class Usuario(
+    val id : Int? = null,
     val nombre: String,
     val direccion: String,
     val telefono: String,
-    val email: String,
-    val contraseña: String,
+    var email: String,
+    var contraseña: String,
     val imagen: String? = null
-) {
+)
+{
+    constructor() : this(null, "", "", "", "", "")
     companion object {
         private const val BASE_URL = URL.BASE_URL
 
@@ -25,17 +28,13 @@ data class Usuario(
                 .url(url)
                 .post(requestBody)
                 .build()
-            println("Enviando solicitud de registro a: $url")
             val client = OkHttpClient()
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    println("Error al enviar solicitud: ${e.message}")
                     callback(false)
                 }
                 override fun onResponse(call: Call, response: Response) {
-                    val success = response.isSuccessful
-                    println("Respuesta recibida. Success = $success")
-                    callback(success)
+                    callback(response.isSuccessful)
                 }
             })
         }
@@ -48,16 +47,13 @@ data class Usuario(
                 .url(url)
                 .post(requestBody)
                 .build()
-            println("Enviando solicitud de inicio de sesión a: $url")
             val client = OkHttpClient()
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    println("Error al enviar solicitud: ${e.message}")
                     callback(false, "", "")
                 }
                 override fun onResponse(call: Call, response: Response) {
                     val success = response.isSuccessful
-                    println("Respuesta recibida. Success = $success")
                     if (success) {
                         val responseBody = response.body?.string() ?: ""
                         val responseObject = JSONObject(responseBody)
@@ -71,45 +67,114 @@ data class Usuario(
             })
         }
 
-        fun crearUsuario(usuarioDto: UsuarioDto): Boolean {
-            val url = "$BASE_URL/usuarios/crear"
+        fun crearUsuario(token: String, usuarioDto: UsuarioDto, callback: (Boolean) -> Unit) {
+            val url = "$BASE_URL/secure/usuarios/crear"
             val json = Gson().toJson(usuarioDto)
             val requestBody = json.toRequestBody("application/json".toMediaType())
             val request = Request.Builder()
                 .url(url)
+                .header("Authorization", "Bearer $token")
                 .post(requestBody)
                 .build()
-            println("Enviando solicitud de creación de usuario a: $url")
             val client = OkHttpClient()
-            val response = client.newCall(request).execute()
-            return response.isSuccessful
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    callback(false)
+                }
+                override fun onResponse(call: Call, response: Response) {
+                    callback(response.isSuccessful)
+                }
+            })
         }
 
-        fun eliminarUsuario(id: Int): Boolean {
-            val url = "$BASE_URL/usuarios/eliminar/$id"
+        fun eliminarUsuario(token: String, id: Int, callback: (Boolean) -> Unit) {
+            val url = "$BASE_URL/secure/usuarios/eliminar/$id"
             val request = Request.Builder()
                 .url(url)
+                .header("Authorization", "Bearer $token")
                 .delete()
                 .build()
-            println("Enviando solicitud de eliminación de usuario a: $url")
             val client = OkHttpClient()
-            val response = client.newCall(request).execute()
-            return response.isSuccessful
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    callback(false)
+                }
+                override fun onResponse(call: Call, response: Response) {
+                    callback(response.isSuccessful)
+                }
+            })
         }
 
-        fun actualizarUsuario(id: Int, usuarioDto: UsuarioDto): Boolean {
-            val url = "$BASE_URL/usuarios/actualizar/$id"
+        fun actualizarUsuario(token: String, id: Int, usuarioDto: UsuarioDto, callback: (Boolean) -> Unit) {
+            val url = "$BASE_URL/secure/usuarios/actualizar"
             val json = Gson().toJson(usuarioDto)
             val requestBody = json.toRequestBody("application/json".toMediaType())
             val request = Request.Builder()
                 .url(url)
+                .header("Authorization", "Bearer $token")
                 .put(requestBody)
                 .build()
-            println("Enviando solicitud de actualización de usuario a: $url")
             val client = OkHttpClient()
-            val response = client.newCall(request).execute()
-            return response.isSuccessful
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    callback(false)
+                }
+                override fun onResponse(call: Call, response: Response) {
+                    callback(response.isSuccessful)
+                }
+            })
         }
+        fun obtenerUsuario(token: String, callback: (Boolean, Usuario?) -> Unit) {
+            val url = "$BASE_URL/secure/usuarios/obtener"
+            val request = Request.Builder()
+                .url(url)
+                .header("Authorization", "Bearer $token")
+                .get()
+                .build()
+
+            val client = OkHttpClient()
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    callback(false, null)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    if (response.isSuccessful) {
+                        val responseBody = response.body?.string() ?: ""
+                        val usuario = Gson().fromJson(responseBody, Usuario::class.java)
+                        callback(true, usuario)
+                    } else {
+                        callback(false, null)
+                    }
+                }
+            })
+        }
+        fun obtenerTodosLosUsuarios(token: String, callback: (Boolean, List<Usuario>?) -> Unit) {
+            val url = "$BASE_URL/secure/usuarios/todos"
+            val request = Request.Builder()
+                .url(url)
+                .header("Authorization", "Bearer $token")
+                .get()
+                .build()
+
+            val client = OkHttpClient()
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    callback(false, null)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    if (response.isSuccessful) {
+                        val responseBody = response.body?.string() ?: ""
+                        val usuarios = Gson().fromJson(responseBody, Array<Usuario>::class.java).toList()
+                        callback(true, usuarios)
+                    } else {
+                        callback(false, null)
+                    }
+                }
+            })
+        }
+
     }
 
     data class UsuarioDto(

@@ -31,6 +31,14 @@ class Vista_gestion : AppCompatActivity() {
             val intent = Intent(this, ListadoProductoGestion::class.java) // Crea un Intent para iniciar addProducto
             startActivity(intent)
         }
+        findViewById<Button>(R.id.btnVerPedidos).setOnClickListener {
+            val intent = Intent(this, GestionPedidos::class.java)
+            startActivity(intent)
+        }
+        findViewById<Button>(R.id.btnGestionUsuarios).setOnClickListener {
+            val intent = Intent(this, GestionUsuarios::class.java)
+            startActivity(intent)
+        }
 
     }
 
@@ -43,6 +51,12 @@ class Vista_gestion : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_logout -> {
                 logout()
+                true
+            }
+            R.id.edit_perfil -> {
+                val intent = Intent(this, Registro::class.java)
+                intent.putExtra("EDITAR_PERFIL", true) // Añadir un booleano para saber que estamos en modo de edición
+                startActivity(intent)
                 true
             }
             else -> super.onOptionsItemSelected(item)

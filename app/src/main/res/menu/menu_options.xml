@@ -5,4 +5,7 @@
         android:id="@+id/action_logout"
         android:title="Cerrar sesión"
         android:orderInCategory="100" />
+    <item
+        android:id="@+id/edit_perfil"
+        android:title="Editar perfil" />
 </menu>
