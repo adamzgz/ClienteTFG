@@ -1,4 +1,5 @@
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import com.example.clientetfgadamboulaiounemuoz.R
 import com.squareup.picasso.Picasso
 import android.view.ContextMenu
 import android.view.Menu
+import com.example.clientetfgadamboulaiounemuoz.detalleProducto
 
 class ProductoAdapter(private val context: Context, private val productos: List<Producto>) : BaseAdapter() {
 
@@ -39,8 +41,16 @@ class ProductoAdapter(private val context: Context, private val productos: List<
         // Registrar la vista para mostrar el menú contextual
         view.setOnCreateContextMenuListener(viewHolder)
 
+        // Añadir OnClickListener para abrir la actividad detalleProducto
+        view.setOnClickListener {
+            val intent = Intent(context, detalleProducto::class.java)
+            intent.putExtra("productoId", producto.id)  // Envía el ID del producto como un extra en el Intent
+            context.startActivity(intent)
+        }
+
         return view
     }
+
 
     inner class ViewHolder(view: View) : View.OnCreateContextMenuListener {
         private val nombreTextView = view.findViewById<TextView>(R.id.nombreTextView)

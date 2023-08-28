@@ -8,8 +8,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.clientetfgadamboulaiounemuoz.R
 
+class UsuarioAdapter(var usuarios: List<Usuario>) : RecyclerView.Adapter<UsuarioAdapter.UsuarioViewHolder>() {
 
-class UsuarioAdapter(private var usuarios: List<Usuario>) : RecyclerView.Adapter<UsuarioAdapter.UsuarioViewHolder>() {
+    var itemLongClickListener: ((View, Int) -> Unit)? = null
 
     class UsuarioViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val id: TextView = itemView.findViewById(R.id.userIdTextView)
@@ -31,12 +32,19 @@ class UsuarioAdapter(private var usuarios: List<Usuario>) : RecyclerView.Adapter
         holder.direccion.text = usuario.direccion
         holder.telefono.text = usuario.telefono
         holder.email.text = usuario.email
+
+        holder.itemView.setOnLongClickListener { view ->
+            itemLongClickListener?.invoke(view, position)
+            true
+        }
     }
 
-    override fun getItemCount() = usuarios.size
+    override fun getItemCount(): Int {
+        return usuarios.size
+    }
 
     fun updateUsuarios(newUsuarios: List<Usuario>) {
-        this.usuarios = newUsuarios
+        usuarios = newUsuarios
         notifyDataSetChanged()
     }
 }

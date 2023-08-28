@@ -1,9 +1,10 @@
 package com.example.clientetfgadamboulaiounemuoz
 
-
 import Usuario
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -17,6 +18,7 @@ class Registro : AppCompatActivity() {
     private lateinit var editTextEmail: EditText
     private lateinit var editTextContraseña: EditText
     private lateinit var buttonRegistrarse: Button
+    private lateinit var buttonDeshabilitarCuenta: Button
     private var isEditMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +32,7 @@ class Registro : AppCompatActivity() {
         editTextEmail = findViewById(R.id.editTextEmail)
         editTextContraseña = findViewById(R.id.editTextContraseña)
         buttonRegistrarse = findViewById(R.id.buttonRegistrarse)
+        buttonDeshabilitarCuenta = findViewById(R.id.buttonDeshabilitarCuenta)
 
         // Check if in edit mode
         isEditMode = intent.getBooleanExtra("EDITAR_PERFIL", false)
@@ -38,6 +41,9 @@ class Registro : AppCompatActivity() {
 
         if (isEditMode) {
             buttonRegistrarse.text = "Actualizar Usuario"
+
+            buttonDeshabilitarCuenta.visibility = View.VISIBLE
+            buttonDeshabilitarCuenta.isEnabled = true
 
             Usuario.obtenerUsuario(token) { success, usuario ->
                 if (success && usuario != null) {
@@ -50,6 +56,30 @@ class Registro : AppCompatActivity() {
                     showToast("Error al cargar usuario")
                 }
             }
+
+            buttonDeshabilitarCuenta.setOnClickListener {
+                AlertDialog.Builder(this)
+                    .setTitle("Deshabilitar cuenta")
+                    .setMessage("¿Estás seguro de que quieres deshabilitar tu cuenta?")
+                    .setPositiveButton("Sí") { _, _ ->
+                        Usuario.deshabilitarMiCuenta(token) { success ->
+                            if (success) {
+                                clearToken()
+                                showToast("Cuenta deshabilitada con éxito")
+                                val intent = Intent(this, Login::class.java)
+                                startActivity(intent)
+                                finish()
+                            } else {
+                                showToast("No se pudo deshabilitar la cuenta")
+                            }
+                        }
+                    }
+                    .setNegativeButton("No", null)
+                    .show()
+            }
+        } else {
+            buttonDeshabilitarCuenta.visibility = View.GONE
+            buttonDeshabilitarCuenta.isEnabled = false
         }
 
         buttonRegistrarse.setOnClickListener {
@@ -99,6 +129,11 @@ class Registro : AppCompatActivity() {
     private fun getToken(): String {
         val sharedPreferences = getSharedPreferences("com.example.clientetfgadamboulaiounemuoz", Context.MODE_PRIVATE)
         return sharedPreferences.getString("token", "") ?: ""
+    }
+
+    private fun clearToken() {
+        val sharedPreferences = getSharedPreferences("com.example.clientetfgadamboulaiounemuoz", Context.MODE_PRIVATE)
+        sharedPreferences.edit().remove("token").apply()
     }
 
     private fun showToast(message: String) {

@@ -174,6 +174,44 @@ data class Usuario(
                 }
             })
         }
+        // Función para deshabilitar una cuenta específica (solo para administradores)
+        fun deshabilitarCuentaAdmin(token: String, id: Int, callback: (Boolean) -> Unit) {
+            val url = "$BASE_URL/secure/usuarios/deshabilitar/admin/$id"
+            val request = Request.Builder()
+                .url(url)
+                .header("Authorization", "Bearer $token")
+                .post("{}".toRequestBody("application/json".toMediaType()))  // Podrías no necesitar un cuerpo en este POST
+                .build()
+            val client = OkHttpClient()
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    callback(false)
+                }
+                override fun onResponse(call: Call, response: Response) {
+                    callback(response.isSuccessful)
+                }
+            })
+        }
+
+        // Función para que el usuario pueda deshabilitar su propia cuenta
+        fun deshabilitarMiCuenta(token: String, callback: (Boolean) -> Unit) {
+            val url = "$BASE_URL/secure/usuarios/deshabilitar"
+            val request = Request.Builder()
+                .url(url)
+                .header("Authorization", "Bearer $token")
+                .post("{}".toRequestBody("application/json".toMediaType()))  // Podrías no necesitar un cuerpo en este POST
+                .build()
+            val client = OkHttpClient()
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    callback(false)
+                }
+                override fun onResponse(call: Call, response: Response) {
+                    callback(response.isSuccessful)
+                }
+            })
+        }
+
 
     }
 

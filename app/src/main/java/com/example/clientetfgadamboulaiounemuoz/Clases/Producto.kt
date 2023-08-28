@@ -5,11 +5,8 @@ import com.google.gson.Gson
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
-import java.io.File
 import java.io.IOException
 import java.io.Serializable
-import java.math.BigDecimal
 
 data class Producto(
     val id: Int,
@@ -36,14 +33,19 @@ data class Producto(
             val client = OkHttpClient()
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
-                    callback(false)
+                    callback(false)  // Devuelve false en caso de fallo
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    callback(response.isSuccessful)
+                    if (response.isSuccessful) {
+                        callback(true)  // Devuelve true si la respuesta es exitosa
+                    } else {
+                        callback(false)  // Devuelve false si la respuesta no es exitosa
+                    }
                 }
             })
         }
+
 
         fun borrarProducto(token: String, id: Int, callback: (Boolean) -> Unit) {
             val url = "$BASE_URL/secure/productos/$id"
@@ -65,36 +67,44 @@ data class Producto(
             })
         }
 
-        fun modificarProducto(token: String, id: Int, nuevoProducto: Producto, imagen: File?, callback: (Boolean) -> Unit) {
+        fun modificarProducto(token: String, id: Int, nuevoProducto: Producto, callback: (Boolean) -> Unit) {
             val url = "$BASE_URL/secure/productos/$id"
 
-            val multipartBody = MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("productoData", Gson().toJson(nuevoProducto))
+            // Convertimos el nuevoProducto a formato JSON
+            val json = Gson().toJson(nuevoProducto)
 
-            imagen?.let {
-                val requestBody = RequestBody.create("image/*".toMediaType(), it)
-                multipartBody.addFormDataPart("imagenProducto", it.name, requestBody)
-            }
+            // Creamos el cuerpo de la solicitud
+            val requestBody = json.toRequestBody("application/json".toMediaType())
 
+            // Construimos la solicitud
             val request = Request.Builder()
                 .url(url)
                 .header("Authorization", "Bearer $token")
-                .put(multipartBody.build())
+                .put(requestBody)
                 .build()
 
+            // Ejecutamos la solicitud
             val client = OkHttpClient()
             client.newCall(request).enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) {
+                    // Podrías loggear el mensaje de error en lugar de pasarlo a través del callback
+                    println("Error de conexión: ${e.message}")
                     callback(false)
                 }
 
                 override fun onResponse(call: Call, response: Response) {
-                    callback(response.isSuccessful)
+                    if (response.isSuccessful) {
+                        // Podrías loggear el mensaje de éxito en lugar de pasarlo a través del callback
+                        println("Producto modificado exitosamente.")
+                        callback(true)
+                    } else {
+                        // Podrías loggear el mensaje de error en lugar de pasarlo a través del callback
+                        println("Error del servidor: ${response.message}")
+                        callback(false)
+                    }
                 }
             })
         }
-
 
         fun obtenerProductos(token: String, callback: (List<Producto>?) -> Unit) {
             val url = "$BASE_URL/secure/productos"
