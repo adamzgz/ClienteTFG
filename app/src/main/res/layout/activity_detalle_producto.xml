@@ -49,22 +49,24 @@
             android:id="@+id/quantityEditText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:hint="Cantidad"
             android:inputType="number"
-            android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/productDescription"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/productDescription" />
 
         <!-- Botón para "Añadir al Carrito" -->
         <Button
             android:id="@+id/addToCartButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Añadir al Carrito"
             android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/quantityEditText"
+            android:text="Añadir al Carrito"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@id/quantityEditText" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

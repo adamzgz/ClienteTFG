@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.util.*
 
 class addProducto : AppCompatActivity() {
 
@@ -71,6 +72,8 @@ class addProducto : AppCompatActivity() {
         }
 
         btnEnviarProducto.setOnClickListener {
+            it.isEnabled = false
+
             if (validarFormulario()) {
                 val imageView = findViewById<ImageView>(R.id.imageViewProducto)
                 if (selectedImageFileName != null) {
@@ -84,12 +87,14 @@ class addProducto : AppCompatActivity() {
                                 crearProducto() // Aquí usarás selectedImageFileName como producto.imagen
                             }
                         } else {
+                            it.isEnabled = true
                             println("Error al cargar la imagen.")
                         }
                     }
                 } else if (isEditMode) {
                     editarProducto() // Puedes conservar la lógica aquí si estás en modo de edición pero la imagen no ha cambiado
                 } else {
+                    it.isEnabled = true
                     mostrarDialogoSinImagen()
                 }
             }
@@ -141,10 +146,14 @@ class addProducto : AppCompatActivity() {
     }
 
     private fun enviarImagenAapi(bitmap: Bitmap, fileName: String, callback: (Boolean) -> Unit) {
+        val fileExtension = fileName.substring(fileName.lastIndexOf("."))
+        val uniqueFileName =  UUID.randomUUID().toString() + fileExtension // Genera un UUID único
+        selectedImageFileName = uniqueFileName // Guarda el nuevo nombre para usarlo más tarde
+        println(selectedImageFileName + "entra enviar imagen")
         val byteArrayOutputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
         val requestBody = RequestBody.create("image/jpeg".toMediaTypeOrNull(), byteArrayOutputStream.toByteArray())
-        val filePart = MultipartBody.Part.createFormData("uploaded_file", fileName, requestBody)
+        val filePart = MultipartBody.Part.createFormData("uploaded_file", uniqueFileName, requestBody) // Usar uniqueFileName en lugar de fileName
 
         val multipartBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
@@ -189,14 +198,14 @@ class addProducto : AppCompatActivity() {
         val descripcion = findViewById<EditText>(R.id.editTextDescripcion).text.toString()
         val precio = findViewById<EditText>(R.id.editTextPrecio).text.toString().toDouble()
         val idCategoria = (findViewById<Spinner>(R.id.spinnerCategoria).selectedItem as Categoria).id
-
+        println(selectedImageFileName + "entra crear producto")
         val nuevoProducto = Producto(
             id = 0,
             nombre = nombre,
             descripcion = descripcion,
             precio = precio,
             idCategoria = idCategoria,
-            imagen = selectedImageFileName!! // Usar el nombre del archivo de la imagen como producto.imagen
+            imagen = selectedImageFileName!! // Usar el nombre único del archivo
         )
 
         val token = getTokenFromSharedPreferences()
@@ -204,7 +213,7 @@ class addProducto : AppCompatActivity() {
         token?.let {
             Producto.crearProducto(it, nuevoProducto) { isSuccess ->
                 runOnUiThread {
-                    if (isSuccess) {  // Cambiado de nuevoProducto != null a isSuccess
+                    if (isSuccess) {
                         Toast.makeText(this, "Producto creado con éxito", Toast.LENGTH_SHORT).show()
                         finish()
                     } else {
@@ -223,16 +232,15 @@ class addProducto : AppCompatActivity() {
             descripcion = findViewById<EditText>(R.id.editTextDescripcion).text.toString(),
             precio = findViewById<EditText>(R.id.editTextPrecio).text.toString().toDouble(),
             idCategoria = (findViewById<Spinner>(R.id.spinnerCategoria).selectedItem as Categoria).id,
-            imagen = selectedImageFileName!! // Usar el nombre del archivo de la imagen como producto.imagen
+            imagen = selectedImageFileName!! // Usar el nombre único del archivo
         )
-
+        println(selectedImageFileName + "entra editar producto")
         getTokenFromSharedPreferences()?.let { token ->
             Producto.modificarProducto(token, producto.id, producto) { isSuccess ->
                 runOnUiThread {
                     if (isSuccess) {
                         println("Producto editado con éxito!")
 
-                        // Sólo ahora enviamos la imagen, si hay una nueva seleccionada.
                         val imageView = findViewById<ImageView>(R.id.imageViewProducto)
                         if (selectedImageFileName != null) {
                             enviarImagenAapi((imageView.drawable as BitmapDrawable).bitmap, selectedImageFileName!!) { isSuccessful ->
@@ -244,7 +252,7 @@ class addProducto : AppCompatActivity() {
                             }
                         }
 
-                        finish() // Podrías mover esto dentro del callback de enviarImagenAapi si sólo quieres finalizar cuando la imagen también se haya cargado con éxito.
+                        finish()
                     } else {
                         println("Error al editar el producto.")
                     }
@@ -253,24 +261,23 @@ class addProducto : AppCompatActivity() {
         }
     }
 
-
     private fun convertBitmapToFile(bitmap: Bitmap, fileName: String): File {
-            // Aquí conviertes tu bitmap a un archivo. Puedes almacenarlo temporalmente.
-            val file = File(externalCacheDir, fileName)
-            val fos = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
-            fos.flush()
-            fos.close()
-            return file
-        }
-
-
-        private fun mostrarDialogoSinImagen() {
-            AlertDialog.Builder(this)
-                .setTitle("Imagen faltante")
-                .setMessage("Por favor, selecciona una imagen para el producto antes de continuar.")
-                .setPositiveButton("Ok") { _, _ -> }
-                .show()
-        }
+        // Aquí conviertes tu bitmap a un archivo. Puedes almacenarlo temporalmente.
+        val file = File(externalCacheDir, fileName)
+        val fos = FileOutputStream(file)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+        fos.flush()
+        fos.close()
+        return file
     }
+
+
+    private fun mostrarDialogoSinImagen() {
+        AlertDialog.Builder(this)
+            .setTitle("Imagen faltante")
+            .setMessage("Por favor, selecciona una imagen para el producto antes de continuar.")
+            .setPositiveButton("Ok") { _, _ -> }
+            .show()
+    }
+}
 
