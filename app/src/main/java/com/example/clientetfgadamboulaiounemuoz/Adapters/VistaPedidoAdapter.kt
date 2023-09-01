@@ -38,7 +38,7 @@ class VistaPedidoAdapter(private val context: Context, private val listaDetalleP
         Producto.obtenerProductoPorId(getToken(), detallePedido.idProducto) { producto ->
             (context as AppCompatActivity).runOnUiThread {
                 holder.vistaPedidoName.text = producto?.nombre
-                holder.vistaPedidoPrice.text = producto?.precio.toString()
+                holder.vistaPedidoPrice.text = String.format("%.2f€", producto?.precio)
                 val imageUrl = "${URL.BASE_URL}/img_productos/${producto?.imagen}"
                 Picasso.get().load(imageUrl).placeholder(R.drawable.logo).error(R.drawable.noimage).into(holder.vistaPedidoImage)
             }

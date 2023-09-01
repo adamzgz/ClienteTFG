@@ -18,10 +18,12 @@ import com.example.clientetfgadamboulaiounemuoz.API.URL
 import com.example.clientetfgadamboulaiounemuoz.Clases.Producto
 import com.squareup.picasso.Picasso
 
-class CarritoAdapter(private val context: Context, private val listaDetallePedido: MutableList<DetallePedido>) : RecyclerView.Adapter<CarritoAdapter.ViewHolder>() {
+class CarritoAdapter(private val context: Context, private val listaDetallePedido: MutableList<DetallePedido>, private val onItemDeleted: () -> Unit) : RecyclerView.Adapter<CarritoAdapter.ViewHolder>() {
 
     private val handler = Handler()
     private val updateDelay: Long = 1000  // 1-second delay
+
+
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val productImage: ImageView = itemView.findViewById(R.id.productImage)
@@ -57,7 +59,7 @@ class CarritoAdapter(private val context: Context, private val listaDetallePedid
             (context as AppCompatActivity).runOnUiThread {
                 println("Producto obtenido: $producto")
                 holder.productName.text = producto?.nombre
-                holder.productPrice.text = producto?.precio.toString()
+                holder.productPrice.text = String.format("%.2f€", producto?.precio)
                 holder.productQuantityEditText.setText(detallePedido.cantidad.toString())
                 val imageUrl = "${URL.BASE_URL}/img_productos/${producto?.imagen}"
                 Picasso.get().load(imageUrl).placeholder(R.drawable.logo).error(R.drawable.noimage).into(holder.productImage)
@@ -82,6 +84,7 @@ class CarritoAdapter(private val context: Context, private val listaDetallePedid
                                     println("DetallePedido eliminado con éxito del servidor.")
                                     listaDetallePedido.removeAt(position)
                                     notifyItemRemoved(position)
+                                    onItemDeleted()
                                 } else {
                                     println("Error al eliminar el DetallePedido del servidor.")
                                 }

@@ -98,16 +98,18 @@ class ListadoCategorias : AppCompatActivity() {
         val token = sharedPreferences.getString("token", "") ?: ""
 
         Categoria.eliminarCategoria(token, categoria.id) { success ->
-            if (success) {
-                // Actualizar la lista de categorías tras la eliminación
-                loadCategorias()
-            } else {
-                // Mostrar mensaje de error
-                AlertDialog.Builder(this)
-                    .setTitle("Error")
-                    .setMessage("Ocurrió un error al eliminar la categoría.")
-                    .setPositiveButton("Aceptar", null)
-                    .show()
+            runOnUiThread {
+                if (success) {
+                    // Actualizar la lista de categorías tras la eliminación
+                    loadCategorias()
+                } else {
+                    // Mostrar mensaje de error
+                    AlertDialog.Builder(this)
+                        .setTitle("Error")
+                        .setMessage("Ocurrió un error al eliminar la categoría.")
+                        .setPositiveButton("Aceptar", null)
+                        .show()
+                }
             }
         }
     }

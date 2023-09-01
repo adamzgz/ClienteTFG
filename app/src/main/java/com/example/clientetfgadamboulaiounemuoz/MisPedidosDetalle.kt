@@ -3,15 +3,19 @@ package com.example.clientetfgadamboulaiounemuoz
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.clientetfgadamboulaiounemuoz.Adapters.VistaPedidoAdapter
 import com.example.clientetfgadamboulaiounemuoz.Clases.DetallePedido
+import com.example.clientetfgadamboulaiounemuoz.Clases.Producto.Companion.obtenerProductoPorId
 
 class MisPedidosDetalle : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var vistaPedidoAdapter: VistaPedidoAdapter
     private val detallePedidos: MutableList<DetallePedido> = mutableListOf()
+    private var totalPrice: Double = 0.0
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,20 +38,40 @@ class MisPedidosDetalle : AppCompatActivity() {
         val token = getTokenFromSharedPreferences()
         if (token != null && token.isNotBlank()) {
             DetallePedido.obtenerDetallesPorPedido(token, idPedido) { detalles ->
-                runOnUiThread {
-                    if (detalles != null) {
+                if (detalles != null) {
+                    // Reset total price
+                    totalPrice = 0.0
+
+                    // Loop through each detallePedido to get Product ID and calculate total
+                    for (detalle in detalles) {
+                        obtenerProductoPorId(token, detalle.idProducto) { producto ->
+                            if (producto != null) {
+                                runOnUiThread {
+                                    // Accumulate total price
+                                    totalPrice += producto.precio * detalle.cantidad
+
+                                    // Update UI, assume totalTextView is a TextView showing total price
+                                    val totalTextView: TextView = findViewById(R.id.totalTextView)
+                                    totalTextView.text = String.format("Total: %.2f€", totalPrice)
+                                }
+                            }
+                        }
+                    }
+
+                    runOnUiThread {
                         detallePedidos.clear()
                         detallePedidos.addAll(detalles)
                         vistaPedidoAdapter.notifyDataSetChanged()
-                    } else {
-                        println("Error al obtener detalles del pedido.")
                     }
+                } else {
+                    println("Error al obtener detalles del pedido.")
                 }
             }
         } else {
             println("Token no disponible.")
         }
     }
+
 
     private fun getTokenFromSharedPreferences(): String? {
         val sharedPreferences = getSharedPreferences("com.example.clientetfgadamboulaiounemuoz", Context.MODE_PRIVATE)

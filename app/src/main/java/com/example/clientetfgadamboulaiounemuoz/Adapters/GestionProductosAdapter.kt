@@ -55,7 +55,7 @@ class GestionProductosAdapter(
             Picasso.get().load(imageUrl).error(R.drawable.noimage).into(imgProducto)
 
             txtNombre.text = producto.nombre + " con el id " + producto.id
-            txtPrecio.text = "${producto.precio} €"
+            txtPrecio.text = String.format("%.2f€", producto.precio)
 
             // Obtener nombre de la categoría
             val token = getTokenFromSharedPreferences()

@@ -17,7 +17,8 @@ class detalleProducto : AppCompatActivity() {
         // Obtener referencias a las vistas donde mostrarás los detalles del producto
         val imagenImageView: ImageView = findViewById(R.id.productImage)  // Suponiendo que tienes un ImageView con este ID
         val nombreTextView: TextView = findViewById(R.id.productTitle)  // Suponiendo que tienes un TextView con este ID
-        val descripcionTextView: TextView = findViewById(R.id.productDescription) // Suponiendo que tienes un TextView con este ID
+        val descripcionTextView: TextView = findViewById(R.id.productDescription)
+        val precioTextView : TextView = findViewById(R.id.productPrice)// Suponiendo que tienes un TextView con este ID
 
         // Obtener el ID del producto del Intent
         val productoId = intent.getIntExtra("productoId", -1)
@@ -35,15 +36,10 @@ class detalleProducto : AppCompatActivity() {
 
                         nombreTextView.text = producto.nombre
                         descripcionTextView.text = producto.descripcion
+                        precioTextView.text = String.format("%.2f€", producto.precio)
                     }
-                } else {
-                    // Mostrar algún mensaje de error o finalizar la actividad
-                    // Ejemplo: finish()
                 }
             }
-        } else {
-            // Mostrar algún mensaje de error o finalizar la actividad
-            // Ejemplo: finish()
         }
     }
 

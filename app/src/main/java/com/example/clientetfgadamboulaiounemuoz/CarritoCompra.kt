@@ -26,7 +26,9 @@ class CarritoCompra : AppCompatActivity() {
         recyclerView = findViewById(R.id.recyclerViewCarrito)
         btnComprar = findViewById(R.id.btnComprar)
 
-        carritoAdapter = CarritoAdapter(this, detallePedidos)
+        carritoAdapter = CarritoAdapter(this, detallePedidos){
+            updateComprarButtonState()
+        }
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = carritoAdapter
 

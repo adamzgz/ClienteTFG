@@ -64,7 +64,8 @@ class ProductoAdapter(private val context: Context, private val productos: List<
             currentProducto = producto
             nombreTextView.text = producto.nombre
             descripcionTextView.text = producto.descripcion
-            precioTextView.text = "${producto.precio} €"
+            precioTextView.text = String.format("%.2f€", producto.precio)
+
 
             val imageUrl = "${URL.BASE_URL}/img_productos/${producto.imagen}"
             Picasso.get().load(imageUrl).placeholder(R.drawable.logo).error(R.drawable.noimage).into(imagenImageView)

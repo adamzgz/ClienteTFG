@@ -91,8 +91,6 @@ class addProducto : AppCompatActivity() {
                             println("Error al cargar la imagen.")
                         }
                     }
-                } else if (isEditMode) {
-                    editarProducto() // Puedes conservar la lógica aquí si estás en modo de edición pero la imagen no ha cambiado
                 } else {
                     it.isEnabled = true
                     mostrarDialogoSinImagen()
@@ -181,12 +179,30 @@ class addProducto : AppCompatActivity() {
 
 
     private fun validarFormulario(): Boolean {
-        val nombre = findViewById<EditText>(R.id.editTextNombre).text.toString()
-        val descripcion = findViewById<EditText>(R.id.editTextDescripcion).text.toString()
-        val precio = findViewById<EditText>(R.id.editTextPrecio).text.toString()
+        val nombre = findViewById<EditText>(R.id.editTextNombre).text.toString().trim()
+        val descripcion = findViewById<EditText>(R.id.editTextDescripcion).text.toString().trim()
+        val precioStr = findViewById<EditText>(R.id.editTextPrecio).text.toString().trim()
+        val spinnerCategorias = findViewById<Spinner>(R.id.spinnerCategoria)
 
-        if (nombre.isEmpty() || descripcion.isEmpty() || precio.isEmpty()) {
+        // Verificar si el spinner de categorías está vacío
+        if (spinnerCategorias.adapter == null || spinnerCategorias.adapter.count == 0) {
+            Toast.makeText(this, "Por favor, crea una categoría antes de intentar crear un producto.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        if (spinnerCategorias.selectedItem == null) {
+            Toast.makeText(this, "La categoría del producto no puede estar vacía.", Toast.LENGTH_SHORT).show()
+            return false
+        }
+        if (nombre.isEmpty() || descripcion.isEmpty() || precioStr.isEmpty()) {
             Toast.makeText(this, "Todos los campos son obligatorios", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        val precio = try {
+            precioStr.toDouble()
+        } catch (e: NumberFormatException) {
+            Toast.makeText(this, "Precio inválido", Toast.LENGTH_SHORT).show()
             return false
         }
 
@@ -241,7 +257,7 @@ class addProducto : AppCompatActivity() {
                     if (isSuccess) {
                         println("Producto editado con éxito!")
 
-                        val imageView = findViewById<ImageView>(R.id.imageViewProducto)
+                        /*val imageView = findViewById<ImageView>(R.id.imageViewProducto)
                         if (selectedImageFileName != null) {
                             enviarImagenAapi((imageView.drawable as BitmapDrawable).bitmap, selectedImageFileName!!) { isSuccessful ->
                                 if (isSuccessful) {
@@ -251,7 +267,7 @@ class addProducto : AppCompatActivity() {
                                 }
                             }
                         }
-
+                          */
                         finish()
                     } else {
                         println("Error al editar el producto.")
@@ -261,7 +277,7 @@ class addProducto : AppCompatActivity() {
         }
     }
 
-    private fun convertBitmapToFile(bitmap: Bitmap, fileName: String): File {
+   /* private fun convertBitmapToFile(bitmap: Bitmap, fileName: String): File {
         // Aquí conviertes tu bitmap a un archivo. Puedes almacenarlo temporalmente.
         val file = File(externalCacheDir, fileName)
         val fos = FileOutputStream(file)
@@ -269,7 +285,7 @@ class addProducto : AppCompatActivity() {
         fos.flush()
         fos.close()
         return file
-    }
+    }*/
 
 
     private fun mostrarDialogoSinImagen() {

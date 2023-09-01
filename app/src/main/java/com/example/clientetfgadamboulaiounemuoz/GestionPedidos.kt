@@ -1,6 +1,7 @@
 package com.example.clientetfgadamboulaiounemuoz
 
 import Pedido.Companion.obtenerPedidos
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -14,6 +15,7 @@ class GestionPedidos : AppCompatActivity() {
     companion object {
         const val REQUEST_CODE = 1
     }
+    @SuppressLint("SuspiciousIndentation")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gestion_pedidos)

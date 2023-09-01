@@ -83,47 +83,79 @@ class Registro : AppCompatActivity() {
         }
 
         buttonRegistrarse.setOnClickListener {
-            val usuario = Usuario(
-                null,
-                editTextNombre.text.toString(),
-                editTextDireccion.text.toString(),
-                editTextTelefono.text.toString(),
-                editTextEmail.text.toString(),
-                editTextContraseña.text.toString()
-            )
+            if (validarCampos()) {
+                val usuario = Usuario(
+                    null,
+                    editTextNombre.text.toString(),
+                    editTextDireccion.text.toString(),
+                    editTextTelefono.text.toString(),
+                    editTextEmail.text.toString(),
+                    editTextContraseña.text.toString()
+                )
 
-            if (isEditMode) {
-                AlertDialog.Builder(this)
-                    .setTitle("Actualizar perfil")
-                    .setMessage("¿Estás seguro de que quieres actualizar tu perfil?")
-                    .setPositiveButton("Sí") { _, _ ->
-                        Usuario.actualizarUsuario(token, usuario.id ?: 0, Usuario.UsuarioDto(
-                            usuario.nombre,
-                            usuario.direccion,
-                            usuario.telefono,
-                            usuario.email,
-                            usuario.contraseña,
-                            usuario.imagen
-                        )) { success ->
-                            if (success) {
-                                finish()
-                            } else {
-                                showToast("Error al actualizar")
+                if (isEditMode) {
+                    AlertDialog.Builder(this)
+                        .setTitle("Actualizar perfil")
+                        .setMessage("¿Estás seguro de que quieres actualizar tu perfil?")
+                        .setPositiveButton("Sí") { _, _ ->
+                            Usuario.actualizarUsuario(token, usuario.id ?: 0, Usuario.UsuarioDto(
+                                usuario.nombre,
+                                usuario.direccion,
+                                usuario.telefono,
+                                usuario.email,
+                                usuario.contraseña,
+                                usuario.imagen
+                            )) { success ->
+                                if (success) {
+                                    finish()
+                                } else {
+                                    showToast("Error al actualizar")
+                                }
                             }
                         }
-                    }
-                    .setNegativeButton("No", null)
-                    .show()
-            } else {
-                Usuario.registrar(usuario) { success ->
-                    if (success) {
-                        finish()
-                    } else {
-                        showToast("Error en el registro")
+                        .setNegativeButton("No", null)
+                        .show()
+                } else {
+                    Usuario.registrar(usuario) { success ->
+                        if (success) {
+                            finish()
+                        } else {
+                            showToast("Error en el registro")
+                        }
                     }
                 }
             }
         }
+    }
+
+    private fun validarCampos(): Boolean {
+        val nombre = editTextNombre.text.toString()
+        val direccion = editTextDireccion.text.toString()
+        val telefono = editTextTelefono.text.toString()
+        val email = editTextEmail.text.toString()
+        val contrasena = editTextContraseña.text.toString()
+
+        if (nombre.isEmpty() || direccion.isEmpty() || telefono.isEmpty() || email.isEmpty() || contrasena.isEmpty()) {
+            showToast("Todos los campos son obligatorios")
+            return false
+        }
+
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            showToast("Formato de correo electrónico no válido")
+            return false
+        }
+
+        if (contrasena.length < 8) {
+            showToast("La contraseña debe tener al menos 8 caracteres")
+            return false
+        }
+
+        if (telefono.length != 10) {
+            showToast("El número de teléfono debe tener exactamente 10 dígitos")
+            return false
+        }
+
+        return true
     }
 
     private fun getToken(): String {
